@@ -12,28 +12,37 @@ class PageAccueil extends JPanel {
 
   public PageAccueil(FenetrePrincipale fenetre) {
     setBackground(Apparence.FOND);
-    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    setLayout(new BorderLayout());
 
     // --- Rangée du haut : Profil | Titre | Déconnexion ---
-    JPanel panneauHaut = new JPanel(new BorderLayout());
+    JPanel panneauHaut = new JPanel(new GridLayout(1, 3));
     panneauHaut.setOpaque(false);
     panneauHaut.setBorder(BorderFactory.createEmptyBorder(15, 15, 0, 15));
 
+    JPanel panneauGauche = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    panneauGauche.setOpaque(false);
     boutonProfil = new JButton("Profil");
     boutonProfil.addActionListener(e -> fenetre.retourProfil());
-    panneauHaut.add(boutonProfil, BorderLayout.WEST);
+    panneauGauche.add(boutonProfil);
 
+    JPanel panneauCentre = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+    panneauCentre.setOpaque(false);
     etiquetteEntete = new JLabel("FinanSavant", SwingConstants.CENTER);
     etiquetteEntete.setFont(Apparence.TITRE);
     etiquetteEntete.setForeground(Apparence.PRINCIPALE);
-    panneauHaut.add(etiquetteEntete, BorderLayout.CENTER);
+    panneauCentre.add(etiquetteEntete);
 
+    JPanel panneauDroite = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+    panneauDroite.setOpaque(false);
     boutonDeconnexion = new JButton("Déconnexion");
     boutonDeconnexion.setVisible(false);
     boutonDeconnexion.addActionListener(e -> fenetre.deconnecter());
-    panneauHaut.add(boutonDeconnexion, BorderLayout.EAST);
+    panneauDroite.add(boutonDeconnexion);
 
-    add(panneauHaut);
+    panneauHaut.add(panneauGauche);
+    panneauHaut.add(panneauCentre);
+    panneauHaut.add(panneauDroite);
+    add(panneauHaut, BorderLayout.NORTH);
 
     // --- Message non connecté ---
     JPanel panneauMessage = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -43,20 +52,19 @@ class PageAccueil extends JPanel {
     messageNonConnecte.setFont(Apparence.CORPS);
     messageNonConnecte.setForeground(Color.GRAY);
     panneauMessage.add(messageNonConnecte);
-    add(panneauMessage);
 
     // --- Rangée des boutons principaux ---
-    JPanel panneauBoutons = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+    JPanel panneauBoutons = new JPanel(new GridLayout(1, 3, 25, 0));
     panneauBoutons.setOpaque(false);
 
     boutonObjectifs = new JButton("Mes Objectifs");
-    boutonObjectifs.setPreferredSize(new Dimension(200, 100));
+    boutonObjectifs.setPreferredSize(new Dimension(200, 300));
     boutonObjectifs.setEnabled(false);
     boutonObjectifs.addActionListener(e -> fenetre.retourObjectif());
     panneauBoutons.add(boutonObjectifs);
 
     boutonInvestissement = new JButton("Investissement");
-    boutonInvestissement.setPreferredSize(new Dimension(200, 100));
+    boutonInvestissement.setPreferredSize(new Dimension(200,300));
     boutonInvestissement.setEnabled(false);
     boutonInvestissement.addActionListener(e -> {
       String saisie = JOptionPane.showInputDialog(this, "Somme initiale pour vos investissements ($) :");
@@ -76,7 +84,7 @@ class PageAccueil extends JPanel {
     panneauBoutons.add(boutonInvestissement);
 
     boutonEpargne = new JButton("Épargne");
-    boutonEpargne.setPreferredSize(new Dimension(200, 100));
+    boutonEpargne.setPreferredSize(new Dimension(200, 300));
     boutonEpargne.setEnabled(false);
     boutonEpargne.addActionListener(e -> {
       String saisie = JOptionPane.showInputDialog(this, "Montant à répartir pour vos projets ($) :");
@@ -95,16 +103,27 @@ class PageAccueil extends JPanel {
     });
     panneauBoutons.add(boutonEpargne);
 
-    add(panneauBoutons);
+    JPanel panneauCentreWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 40));
+    panneauCentreWrapper.setOpaque(false);
+    panneauCentreWrapper.add(panneauBoutons);
+    add(panneauCentreWrapper, BorderLayout.CENTER);
 
-    // --- Bouton Admin ---
+    // --- Bas de page : message et bouton Admin ---
     JPanel panneauAdmin = new JPanel(new FlowLayout(FlowLayout.CENTER));
     panneauAdmin.setOpaque(false);
     boutonAdmin = new JButton("Gérer les comptes");
     boutonAdmin.setVisible(false);
     boutonAdmin.addActionListener(e -> fenetre.retourAdmin());
     panneauAdmin.add(boutonAdmin);
-    add(panneauAdmin);
+
+    JPanel panneauBas = new JPanel();
+    panneauBas.setOpaque(false);
+    panneauBas.setLayout(new BoxLayout(panneauBas, BoxLayout.Y_AXIS));
+    panneauMessage.setAlignmentX(Component.CENTER_ALIGNMENT);
+    panneauAdmin.setAlignmentX(Component.CENTER_ALIGNMENT);
+    panneauBas.add(panneauMessage);
+    panneauBas.add(panneauAdmin);
+    add(panneauBas, BorderLayout.SOUTH);
   }
 
   public void definirUtilisateurConnecte(boolean connecte, String nomUtilisateur) {
@@ -112,7 +131,7 @@ class PageAccueil extends JPanel {
     boutonInvestissement.setEnabled(connecte);
     boutonEpargne.setEnabled(connecte);
     if (connecte && GestionAuth.estAdmin(nomUtilisateur)) {
-      etiquetteEntete.setText("Administration FinanSavant");
+      etiquetteEntete.setText("FinanSavant Admin");
     } else {
       etiquetteEntete.setText("FinanSavant");
     }
