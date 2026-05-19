@@ -1315,9 +1315,12 @@ class PageInvestissement extends JPanel {
  private void showTextDialog(String title, String content, int width, int height) {
    JTextArea area = new JTextArea(content);
    area.setEditable(false);
+   area.setLineWrap(true);
+   area.setWrapStyleWord(true);
    area.setFont(new Font("Monospaced", Font.PLAIN, 13));
    area.setMargin(new Insets(10, 10, 10, 10));
    JScrollPane scroll = new JScrollPane(area);
+   scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
    scroll.setPreferredSize(new Dimension(width, height));
    JOptionPane.showMessageDialog(this, scroll, title, JOptionPane.PLAIN_MESSAGE);
  }
