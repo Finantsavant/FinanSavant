@@ -43,7 +43,7 @@ class PageAdmin extends JPanel {
     JPanel panneauBoutons = new JPanel(new GridLayout(1, 0, 10, 10));
 
 
-    // --- bouton supprimer un seul compte ---
+    // bouton supprimer un seul compte
     JButton boutonSupprimer = new JButton("Supprimer le compte sélectionné");
     boutonSupprimer.addActionListener(e -> {
       String selection = listeUtilisateurs.getSelectedValue();
