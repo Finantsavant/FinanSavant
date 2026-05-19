@@ -1,6 +1,7 @@
 import java.awt.*;
 
-/** Constantes partagées (couleurs et polices) pour l'apparence de l'application. */
+// Classe qui contient les constantes liées à l’apparence de l'interface du programme
+// public static final parce qu'on ne veut pas les variables soient changés
 class Apparence {
   public static final Color PRINCIPALE = new Color(41, 128, 185);
   public static final Color SECONDAIRE = new Color(46, 204, 113);
