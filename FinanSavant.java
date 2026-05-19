@@ -1,15 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-// LocalDateTime = date + heure sans fuseau (pas dans le cours, on utilise ça au lieu de vieux trucs genre Date)
-import java.time.LocalDateTime;
-// DateTimeFormatter = pour afficher la date comme on veut (ex: "16 mai 2026 14:30")
-import java.time.format.DateTimeFormatter;
 // HashMap = genre un dictionnaire: tu donnes une clé (ex: username) et tu récupères une valeur (ex: password) super vite
 import java.util.HashMap;
 // HashSet = liste où chaque truc ne peut exister qu'une fois (parfait pour la liste des admins sans doublons)
 import java.util.HashSet;
-import java.util.Random; // Random on l'a vu en cours — nextInt() pour des trucs aléatoires
 import java.util.Set; // Set = interface pour des collections, ici on l'utilise juste pour typer une variable temporaire
 import java.util.ArrayList; // ArrayList = liste dynamique du cours, elle grandit toute seule quand on add()
 import javax.swing.border.EmptyBorder; // EmptyBorder = marge vide autour d'un panneau (padding) pour que ce soit pas collé aux bords
@@ -887,10 +882,6 @@ class PageInvestissement extends JPanel {
  JCheckBox obligationsBox;
  JCheckBox commoditesBox;
  JCheckBox reitsBox;
- private JLabel marketPulseLabel;
- private JLabel lastUpdateLabel;
- private JTextArea advisorArea;
- private Random random = new Random();
  // LinkedHashMap = comme HashMap MAIS garde l'ordre où t'as ajouté les trucs (utile pour afficher dans un ordre fixe)
  private static final java.util.Map < String, String > DESCRIPTIONS = new java.util.LinkedHashMap < > ();
  static { // même idée que le static block dans AuthManager — remplit DESCRIPTIONS au chargement de la classe
@@ -994,30 +985,6 @@ class PageInvestissement extends JPanel {
    typePanel.add(commoditesBox);
    typePanel.add(reitsBox);
    mainContainer.add(typePanel, gbc);
-   gbc.gridx = 1;
-   gbc.weightx = 0.4;
-   JPanel advisorPanel = new JPanel(new BorderLayout(8, 8));
-   advisorPanel.setOpaque(false);
-   advisorPanel.setBorder(BorderFactory.createTitledBorder("Conseiller financier"));
-   marketPulseLabel = new JLabel("Marché : sélectionnez votre profil pour générer des conseils.");
-   marketPulseLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-   advisorArea = new JTextArea(12, 30);
-   advisorArea.setEditable(false);
-   advisorArea.setLineWrap(true);
-   advisorArea.setWrapStyleWord(true);
-   advisorArea.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-   advisorArea.setText("Votre conseiller personnel attend vos choix. Sélectionnez des options pour voir une analyse personnalisée et une simulation de croissance.");
-   advisorArea.setBackground(new Color(250, 250, 250));
-   // JScrollPane : Conteneur qui ajoute des barres de défilement à un composant.
-   // Source : https://docs.oracle.com/javase/8/docs/api/javax/swing/JScrollPane.html
-   JScrollPane advisorScroll = new JScrollPane(advisorArea);
-   advisorScroll.setBorder(BorderFactory.createEmptyBorder());
-   lastUpdateLabel = new JLabel("Dernière mise à jour : " + getCurrentTimestamp());
-   advisorPanel.add(marketPulseLabel, BorderLayout.NORTH);
-   advisorPanel.add(advisorScroll, BorderLayout.CENTER);
-   advisorPanel.add(lastUpdateLabel, BorderLayout.SOUTH);
-   mainContainer.add(advisorPanel, gbc);
-  
    gbc.gridy++;
    gbc.gridx = 0;
    gbc.gridwidth = 2;
@@ -1028,16 +995,10 @@ class PageInvestissement extends JPanel {
    genererBtn.setFont(Theme.SUBTITLE);
    genererBtn.setBackground(Theme.SECONDARY);
    genererBtn.setForeground(Color.WHITE);
-   genererBtn.setPreferredSize(new Dimension(220, 50));
-   JButton simulateBtn = new JButton("Simuler la croissance");
-   simulateBtn.setFont(Theme.SUBTITLE);
-   simulateBtn.setBackground(new Color(69, 179, 157));
-   simulateBtn.setForeground(Color.WHITE);
-   simulateBtn.setPreferredSize(new Dimension(220, 50));
+   genererBtn.setPreferredSize(new Dimension(240, 50));
    btnPanel.add(genererBtn);
-   btnPanel.add(simulateBtn);
    mainContainer.add(btnPanel, gbc);
-   add(mainContainer, BorderLayout.CENTER);
+   add(new JScrollPane(mainContainer), BorderLayout.CENTER);
   
    // AncestorListener = PAS ActionListener — se déclenche quand le panneau devient visible dans la fenêtre
    // (genre quand CardLayout montre la page INVEST). On reset les checkboxes à chaque fois qu'on arrive sur la page.
@@ -1049,14 +1010,14 @@ class PageInvestissement extends JPanel {
      public void ancestorMoved(javax.swing.event.AncestorEvent e) {}
    });
   
-   // Mise à jour de l'aperçu du conseiller dès qu'une case est cochée ou changée.
-  risqueBox.addActionListener(e -> refreshAdvisorPreview(frame));
-   actionsBox.addActionListener(e -> refreshAdvisorPreview(frame));
-   etfBox.addActionListener(e -> refreshAdvisorPreview(frame));
-   cryptoBox.addActionListener(e -> refreshAdvisorPreview(frame));
-   obligationsBox.addActionListener(e -> refreshAdvisorPreview(frame));
-   commoditesBox.addActionListener(e -> refreshAdvisorPreview(frame));
-   reitsBox.addActionListener(e -> refreshAdvisorPreview(frame));
+   // Mise à jour des sélections quand une case est cochée.
+   risqueBox.addActionListener(e -> {});
+   actionsBox.addActionListener(e -> {});
+   etfBox.addActionListener(e -> {});
+   cryptoBox.addActionListener(e -> {});
+   obligationsBox.addActionListener(e -> {});
+   commoditesBox.addActionListener(e -> {});
+   reitsBox.addActionListener(e -> {});
   
    genererBtn.addActionListener(e -> {
      double montant = frame.montantOutil;
@@ -1078,36 +1039,8 @@ class PageInvestissement extends JPanel {
        return;
      }
      int risqueLevel = getRiskLevel();
-     refreshAdvisorPreview(frame);
      String plan = buildPlan(montant, user, risqueLevel);
      showTextDialog("Votre plan d'investissement personnalisé", plan, 580, 520);
-   });
-  
-   simulateBtn.addActionListener(e -> {
-     double montant = frame.montantOutil;
-     if (montant <= 0) {
-       JOptionPane.showMessageDialog(this, "Le montant doit être positif.");
-       return;
-     }
-     DonneesUtilisateur user = GestionAuth.obtenirProfilUtilisateur(frame.loggedInUsername);
-     if (user == null) {
-       JOptionPane.showMessageDialog(this, "Profil introuvable.");
-       return;
-     }
-     boolean anySelected = actionsBox.isSelected() || etfBox.isSelected() ||
-     cryptoBox.isSelected() || obligationsBox.isSelected() ||
-     commoditesBox.isSelected() || reitsBox.isSelected();
-     if (!anySelected) {
-       JOptionPane.showMessageDialog(this,
-         "Veuillez sélectionner au moins un type d'investissement.");
-       return;
-     }
-     int risqueLevel = getRiskLevel();
-     refreshAdvisorPreview(frame);
-     String simulation = buildSimulationReport(montant, user, risqueLevel,
-       actionsBox.isSelected(), etfBox.isSelected(), cryptoBox.isSelected(),
-       obligationsBox.isSelected(), commoditesBox.isSelected(), reitsBox.isSelected());
-     showTextDialog("Simulation de croissance", simulation, 580, 520);
    });
  }
  // Crée une case à cocher qui affiche une description détaillée du type d'investissement avant sélection.
@@ -1344,18 +1277,6 @@ class PageInvestissement extends JPanel {
    String risque = (String) risqueBox.getSelectedItem();
    return risque.startsWith("Faible") ? 0 : risque.startsWith("Moyen") ? 1 : 2; // ternaire chaîné
  }
- // Met à jour la boîte texte du conseiller en temps réel.
- private void refreshAdvisorPreview(FenetrePrincipale frame) {
-   DonneesUtilisateur user = GestionAuth.obtenirProfilUtilisateur(frame.loggedInUsername);
-   if (user == null) return;
-   int riskLevel = getRiskLevel();
-   boolean anySelected = actionsBox.isSelected() || etfBox.isSelected() ||
-     cryptoBox.isSelected() || obligationsBox.isSelected() ||
-     commoditesBox.isSelected() || reitsBox.isSelected();
-   marketPulseLabel.setText(getMarketPulse(riskLevel));
-   lastUpdateLabel.setText("Dernière mise à jour : " + getCurrentTimestamp());
-   advisorArea.setText(getAdvisorSummary(user, riskLevel, frame.montantOutil, anySelected));
- }
  // Génère un résumé textuel basé sur les données de l'utilisateur.
  private String getAdvisorSummary(DonneesUtilisateur user, int riskLevel, double montant, boolean anySelected) {
    StringBuilder sb = new StringBuilder();
@@ -1388,35 +1309,8 @@ class PageInvestissement extends JPanel {
      sb.append("- Préservez votre capital, avec une portion plus élevée en revenus fixes.\n");
    }
    sb.append("- Toujours garder une réserve de trésorerie pour profiter des opportunités sans paniquer.\n\n");
-   sb.append("Ce conseiller simule l'évolution de votre portefeuille et vous aide à conserver une stratégie claire.\n");
+   sb.append("Ce rapport inclut une projection de croissance simple pour vous aider à visualiser l'évolution possible de votre portefeuille.\n");
    return sb.toString();
- }
- private String getMarketPulse(int riskLevel) {
-   int seed = random.nextInt(3);
-   if (riskLevel == 0) {
-     return seed == 0 ?
-       "Marché actuel : préférence pour les actifs défensifs et les flux de trésorerie stables." :
-       seed == 1 ?
-       "Marché actuel : volatilité modérée, privilégiez la sécurité." :
-       "Marché actuel : conditions favorables pour renforcer la réserve de capital.";
-   }
-   if (riskLevel == 1) {
-     return seed == 0 ?
-       "Marché actuel : bonnes opportunités de diversification." :
-       seed == 1 ?
-       "Marché actuel : équilibrez croissance et protection." :
-       "Marché actuel : restez attentif aux tendances sectorielles.";
-   }
-   return seed == 0 ?
-     "Marché actuel : tolérance élevée recommandée, mais surveillez la volatilité." :
-     seed == 1 ?
-     "Marché actuel : opportunités de croissance agressive présentes." :
-     "Marché actuel : le marché est volatile, ciblez des positions long terme.";
- }
- private String getCurrentTimestamp() {
-   // ofPattern = tu définis le format de date toi-même (MMM = mois abrégé genre "mai")
-   DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
-   return LocalDateTime.now().format(formatter); // now() = date/heure actuelle de l'ordi
  }
  private void showTextDialog(String title, String content, int width, int height) {
    JTextArea area = new JTextArea(content);
@@ -1921,4 +1815,3 @@ class PageAdmin extends JPanel {
    }
  }
 }
-
