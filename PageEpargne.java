@@ -115,7 +115,6 @@ class PageEpargne extends JPanel {
     plan.append("Occupation : ").append(donneesUtilisateur.occupation).append("\n");
     plan.append("Objectif : ").append(objectifPrincipal).append("\n");
     plan.append("Propriétaire : ").append(boiteStatutProprietaire.getSelectedItem()).append("\n\n");
-    plan.append(">>> COMPTE RECOMMANDÉ : ").append(compteRecommande).append(" <<<\n\n");
 
     if (!listeObjectifs.isEmpty()) {
       plan.append("VOS OBJECTIFS\n");
