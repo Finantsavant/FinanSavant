@@ -12,59 +12,48 @@ class PageAccueil extends JPanel {
 
   public PageAccueil(FenetrePrincipale fenetre) {
     setBackground(Apparence.FOND);
-    setLayout(new GridBagLayout());
-    GridBagConstraints contraintes = new GridBagConstraints();
-    contraintes.insets = new Insets(15, 15, 15, 15);
+    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+    // --- Rangée du haut : Profil | Titre | Déconnexion ---
+    JPanel panneauHaut = new JPanel(new BorderLayout());
+    panneauHaut.setOpaque(false);
+    panneauHaut.setBorder(BorderFactory.createEmptyBorder(15, 15, 0, 15));
 
     boutonProfil = new JButton("Profil");
     boutonProfil.addActionListener(e -> fenetre.retourProfil());
-    contraintes.gridx = 0;
-    contraintes.gridy = 0;
-    contraintes.weightx = 0;
-    contraintes.weighty = 0;
-    contraintes.anchor = GridBagConstraints.NORTHWEST;
-    add(boutonProfil, contraintes);
+    panneauHaut.add(boutonProfil, BorderLayout.WEST);
 
     etiquetteEntete = new JLabel("FinanSavant", SwingConstants.CENTER);
     etiquetteEntete.setFont(Apparence.TITRE);
     etiquetteEntete.setForeground(Apparence.PRINCIPALE);
-    contraintes.gridx = 1;
-    contraintes.gridy = 0;
-    contraintes.weightx = 1.0;
-    contraintes.anchor = GridBagConstraints.CENTER;
-    add(etiquetteEntete, contraintes);
+    panneauHaut.add(etiquetteEntete, BorderLayout.CENTER);
 
     boutonDeconnexion = new JButton("Déconnexion");
     boutonDeconnexion.setVisible(false);
     boutonDeconnexion.addActionListener(e -> fenetre.deconnecter());
-    contraintes.gridx = 2;
-    contraintes.gridy = 0;
-    contraintes.weightx = 0;
-    contraintes.anchor = GridBagConstraints.NORTHEAST;
-    add(boutonDeconnexion, contraintes);
+    panneauHaut.add(boutonDeconnexion, BorderLayout.EAST);
 
+    add(panneauHaut);
+
+    // --- Message non connecté ---
+    JPanel panneauMessage = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    panneauMessage.setOpaque(false);
     messageNonConnecte = new JLabel(
       "Veuillez vous connecter (bouton Profil) pour utiliser les options.", SwingConstants.CENTER);
     messageNonConnecte.setFont(Apparence.CORPS);
     messageNonConnecte.setForeground(Color.GRAY);
-    contraintes.gridx = 0;
-    contraintes.gridy = 1;
-    contraintes.gridwidth = 3;
-    contraintes.weighty = 0.1;
-    contraintes.fill = GridBagConstraints.HORIZONTAL;
-    add(messageNonConnecte, contraintes);
+    panneauMessage.add(messageNonConnecte);
+    add(panneauMessage);
 
-    contraintes.gridwidth = 1;
-    contraintes.weighty = 0.5;
-    contraintes.gridy = 2;
-    contraintes.fill = GridBagConstraints.BOTH;
+    // --- Rangée des boutons principaux ---
+    JPanel panneauBoutons = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+    panneauBoutons.setOpaque(false);
 
     boutonObjectifs = new JButton("Mes Objectifs");
     boutonObjectifs.setPreferredSize(new Dimension(200, 100));
     boutonObjectifs.setEnabled(false);
     boutonObjectifs.addActionListener(e -> fenetre.retourObjectif());
-    contraintes.gridx = 0;
-    add(boutonObjectifs, contraintes);
+    panneauBoutons.add(boutonObjectifs);
 
     boutonInvestissement = new JButton("Investissement");
     boutonInvestissement.setPreferredSize(new Dimension(200, 100));
@@ -84,8 +73,7 @@ class PageAccueil extends JPanel {
         JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre valide.");
       }
     });
-    contraintes.gridx = 1;
-    add(boutonInvestissement, contraintes);
+    panneauBoutons.add(boutonInvestissement);
 
     boutonEpargne = new JButton("Épargne");
     boutonEpargne.setPreferredSize(new Dimension(200, 100));
@@ -105,16 +93,18 @@ class PageAccueil extends JPanel {
         JOptionPane.showMessageDialog(this, "Veuillez entrer un nombre valide.");
       }
     });
-    contraintes.gridx = 2;
-    add(boutonEpargne, contraintes);
+    panneauBoutons.add(boutonEpargne);
 
+    add(panneauBoutons);
+
+    // --- Bouton Admin ---
+    JPanel panneauAdmin = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    panneauAdmin.setOpaque(false);
     boutonAdmin = new JButton("Gérer les comptes");
     boutonAdmin.setVisible(false);
     boutonAdmin.addActionListener(e -> fenetre.retourAdmin());
-    contraintes.gridx = 1;
-    contraintes.gridy = 3;
-    contraintes.weighty = 0;
-    add(boutonAdmin, contraintes);
+    panneauAdmin.add(boutonAdmin);
+    add(panneauAdmin);
   }
 
   public void definirUtilisateurConnecte(boolean connecte, String nomUtilisateur) {
@@ -132,3 +122,4 @@ class PageAccueil extends JPanel {
     boutonAdmin.setVisible(connecte && GestionAuth.estAdmin(nomUtilisateur));
   }
 }
+
