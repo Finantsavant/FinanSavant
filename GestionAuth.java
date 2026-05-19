@@ -26,8 +26,6 @@ class GestionAuth {
   // HashSet utilisé pour stocker les administrateurs uniques.
   // Source : https://www.w3schools.com/java/java_hashset.asp
   private static HashSet<String> administrateurs = new HashSet<>();
-  private static HashMap<String, String> utilisateurs = new HashMap<>();
-  private static HashSet<String> administrateurs = new HashSet<>();
   private static HashMap<String, DonneesUtilisateur> profils = new HashMap<>();
   // Liste des utilisateurs prédéfini qui ont accèss au fonctions administrateurs
   private static final String[][] ADMINS_PAR_DEFAUT = {
