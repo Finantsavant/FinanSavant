@@ -1,11 +1,16 @@
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Textes explicatifs pour chaque type d'investissement. */
+/** textes explicatifs pour chaque type d'investissement */
 class DescriptionsInvestissement {
+
+  // linkedhashmap garde l’ordre d’insertion (les éléments restent dans l’ordre où on les ajoute)
   private static final Map<String, String> DESCRIPTIONS = new LinkedHashMap<>();
 
   static {
+
+    // on associe chaque type d’investissement à une description en html
+    // html ici sert à formater le texte (gras, sauts de ligne, listes) dans une interface graphique
     DESCRIPTIONS.put("Actions",
       "<html><b>Actions</b><br><br>"
         + "Une action représente une part de propriété dans une entreprise cotée en bourse.<br><br>"
@@ -13,43 +18,50 @@ class DescriptionsInvestissement {
         + "• Volatilité plus importante que d'autres produits<br>"
         + "• Idéal pour un horizon d'investissement de 5 ans et plus<br><br>"
         + "Risque : Moyen à Élevé</html>");
+
     DESCRIPTIONS.put("FNB",
       "<html><b>Fonds négociés en bourse (FNB)</b><br><br>"
-        + "Un FNB regroupe plusieurs titres (actions, obligations) en un seul produit.<br><br>"
-        + "• Diversification automatique<br>"
-        + "• Frais de gestion très bas<br>"
-        + "• Idéal pour les investisseurs débutants ou passifs<br><br>"
-        + "Risque : Faible à Moyen</html>");
+        + "Un fnb regroupe plusieurs titres (actions, obligations) en un seul produit.<br><br>"
+        + "• diversification automatique<br>"
+        + "• frais de gestion très bas<br>"
+        + "• idéal pour les investisseurs débutants ou passifs<br><br>"
+        + "Risque : faible à moyen</html>");
+
     DESCRIPTIONS.put("Cryptomonnaies",
       "<html><b>Cryptomonnaies</b><br><br>"
-        + "Monnaies numériques décentralisées (ex. : Bitcoin, Ethereum).<br><br>"
-        + "• Potentiel de gains très élevés<br>"
-        + "• Volatilité extrêmement forte<br>"
-        + "• Convient aux profils tolérant un risque élevé<br><br>"
-        + "Risque : Très Élevé</html>");
+        + "monnaies numériques décentralisées (ex. bitcoin, ethereum).<br><br>"
+        + "• potentiel de gains très élevés<br>"
+        + "• volatilité extrêmement forte<br>"
+        + "• convient aux profils tolérant un risque élevé<br><br>"
+        + "Risque : très élevé</html>");
+
     DESCRIPTIONS.put("Obligations",
       "<html><b>Obligations</b><br><br>"
-        + "Prêts à des gouvernements ou entreprises en échange d'intérêts.<br><br>"
-        + "• Revenus fixes et prévisibles<br>"
-        + "• Capital généralement protégé<br>"
-        + "• Idéal pour les profils conservateurs<br><br>"
-        + "Risque : Faible</html>");
+        + "prêts à des gouvernements ou entreprises en échange d'intérêts.<br><br>"
+        + "• revenus fixes et prévisibles<br>"
+        + "• capital généralement protégé<br>"
+        + "• idéal pour les profils conservateurs<br><br>"
+        + "Risque : faible</html>");
+
     DESCRIPTIONS.put("Matières premières",
       "<html><b>Matières premières</b><br><br>"
-        + "Ressources physiques : or, pétrole, blé, etc.<br><br>"
-        + "• Protection contre l'inflation<br>"
-        + "• Faible corrélation avec les marchés boursiers<br><br>"
-        + "Risque : Moyen</html>");
+        + "ressources physiques : or, pétrole, blé, etc.<br><br>"
+        + "• protection contre l'inflation<br>"
+        + "• faible corrélation avec les marchés boursiers<br><br>"
+        + "Risque : moyen</html>");
+
     DESCRIPTIONS.put("Immobilier coté",
       "<html><b>Immobilier coté</b><br><br>"
-        + "Investir dans l'immobilier sans acheter un bien directement.<br><br>"
-        + "• Dividendes réguliers<br>"
-        + "• Exposition au marché immobilier<br>"
-        + "• Plus liquide que l'immobilier physique<br><br>"
-        + "Risque : Moyen</html>");
+        + "investir dans l'immobilier sans acheter un bien directement.<br><br>"
+        + "• dividendes réguliers<br>"
+        + "• exposition au marché immobilier<br>"
+        + "• plus liquide que l'immobilier physique<br><br>"
+        + "Risque : moyen</html>");
   }
 
+  // méthode qui retourne la description selon le type choisi
   static String obtenirDescription(String etiquette) {
-    return DESCRIPTIONS.getOrDefault(etiquette, "<html>Aucune description disponible.</html>");
+    // si la clé existe pas, on affiche un message par défaut
+    return DESCRIPTIONS.getOrDefault(etiquette, "<html>aucune description disponible.</html>");
   }
 }
