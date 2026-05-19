@@ -45,19 +45,26 @@ class GestionAuth {
   private static void chargerDonnees() {
     // Définition d’un objet qui représente le fichier principal.
     File fichier = new File(FICHIER_UTILISATEURS);
+    // Si le fichier principale n'existe pas, on vérifie la celle d'avant et l'utilise celle là si ça existe.
+    // Cette façon, plusieurs fichiers ne seront pas accidentellemet crée.
     if (!fichier.exists()) {
       File ancienFichier = new File("users.txt");
       if (ancienFichier.exists()) fichier = ancienFichier;
     }
+    // Si aucun fichier n’existe, appelle à la méthode initialiserParDefaut().
     if (!fichier.exists()) {
       initialiserParDefaut();
       sauvegarderDonnees();
       return;
     }
     try (Scanner lecteur = new Scanner(fichier)) {
+      // Efface les collections avant de charger les données
+      // Source: https://www.w3schools.com/java/ref_arraylist_clear.asp 
       utilisateurs.clear();
       administrateurs.clear();
       profils.clear();
+      // Méthode hasNextLine() pour que la lecture est fait ligne par ligne.
+      // Source: https://www.geeksforgeeks.org/java/scanner-hasnextline-method-in-java-with-examples/ 
       while (lecteur.hasNextLine()) {
         String ligne = lecteur.nextLine();
         String[] morceaux = ligne.split(DELIMITEUR_REGEX);
