@@ -3,22 +3,27 @@ import java.awt.*;
 
 /** administration des comptes utilisateurs (réservée aux administrateurs). */
 class PageAdmin extends JPanel {
-  // modèle qui garde les comptes à afficher dans la liste
+
+  // DefaultListModel = liste dynamique qu'on peut modifier sans recréer toute la JList
+  // https://docs.oracle.com/javase/8/docs/api/javax/swing/DefaultListModel.html
   private DefaultListModel<String> modeleListeUtilisateurs;
-  // liste visible à l'écran pour sélectionner un compte
+
+  // JList affiche le contenu du modèle et permet de cliquer pour sélectionner
   private JList<String> listeUtilisateurs;
-  // fenêtre principale de l'application, utilisée pour revenir ou se déconnecter
+
+  // référence vers la fenêtre principale pour naviguer ou déconnecter
   private final FenetrePrincipale fenetre;
-  // bouton caché sauf pour l'utilisateur spécial barbieri
+
+  // bouton noir secret, visible seulement si "barbieri" est connecté
   private JButton boutonReinitBarbieri;
 
-  // crée la page admin avec la fenêtre principale en paramètre
+
   public PageAdmin(FenetrePrincipale fenetre) {
     this.fenetre = fenetre;
     setBackground(Apparence.FOND);
     setLayout(new BorderLayout());
 
-    // barre du haut avec le bouton retour
+    // bouton retour "<" en haut à gauche, gros pour être facile à cliquer
     JPanel barreHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
     barreHaut.setBackground(Apparence.FOND);
     JButton boutonRetour = new JButton("<");
@@ -28,129 +33,131 @@ class PageAdmin extends JPanel {
     barreHaut.add(boutonRetour);
     add(barreHaut, BorderLayout.NORTH);
 
-    // initialise la liste des utilisateurs
+    // liste des utilisateurs au centre, avec défilement si trop longue
     modeleListeUtilisateurs = new DefaultListModel<>();
     listeUtilisateurs = new JList<>(modeleListeUtilisateurs);
     add(new JScrollPane(listeUtilisateurs), BorderLayout.CENTER);
 
-    // zone du bas avec les actions d'administration
+    // GridLayout(1, 0) = une rangée, autant de colonnes que de boutons ajoutés
+    // https://docs.oracle.com/javase/8/docs/api/java/awt/GridLayout.html
     JPanel panneauBoutons = new JPanel(new GridLayout(1, 0, 10, 10));
 
-    // bouton pour supprimer seulement le compte choisi
+
+    // --- bouton supprimer un seul compte ---
     JButton boutonSupprimer = new JButton("Supprimer le compte sélectionné");
     boutonSupprimer.addActionListener(e -> {
       String selection = listeUtilisateurs.getSelectedValue();
       if (selection != null) {
-        // on prend juste le nom d'utilisateur avant les détails
+        // le format est "nomUtilisateur (détails...)", donc on coupe avant la parenthèse
+        // https://stackoverflow.com/questions/3481828/how-to-split-a-string-in-java
         String nomUtilisateur = selection.split(" \\(")[0];
 
-        // on empêche de supprimer un admin pour éviter de casser le système
+        // on interdit la suppression d'un admin pour pas se retrouver sans accès
         if (GestionAuth.estAdmin(nomUtilisateur)) {
           JOptionPane.showMessageDialog(this, "Impossible de supprimer un administrateur.",
             "Erreur", JOptionPane.ERROR_MESSAGE);
           return;
         }
 
-        // confirmation avant la suppression, pour éviter une erreur de clic
+        // confirmation avant d'agir, car la suppression est permanente
         int confirmation = JOptionPane.showConfirmDialog(this,
           "Voulez-vous vraiment supprimer le compte " + nomUtilisateur + " ?",
           "Confirmation", JOptionPane.YES_NO_OPTION);
 
         if (confirmation == JOptionPane.YES_OPTION) {
           try {
-            // suppression réelle du compte
             GestionAuth.supprimerCompte(nomUtilisateur);
 
-            // si on a supprimé le compte connecté, on déconnecte la personne
+            // si c'est le compte connecté qui vient d'être supprimé, on déconnecte
             if (nomUtilisateur.equals(fenetre.nomUtilisateurConnecte)) fenetre.deconnecter();
 
-            // on recharge la liste pour enlever le compte supprimé
-            actualiserListeUtilisateurs();
+            actualiserListeUtilisateurs(); // recharge la liste à jour
           } catch (IllegalArgumentException ex) {
-            // message d'erreur si la suppression est refusée
+            // GestionAuth peut lancer une exception si la suppression est refusée
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
           }
         }
       } else {
-        // aucun compte n'a été choisi
+        // personne de sélectionné dans la liste
         JOptionPane.showMessageDialog(this, "Veuillez sélectionner un compte à supprimer.");
       }
     });
 
-    // bouton dangereux pour effacer tous les comptes non-admin
+
+    // --- bouton rouge pour effacer TOUS les comptes non-admin ---
     JButton boutonEffacerTous = new JButton("Réinitialiser tous les comptes");
     boutonEffacerTous.setBackground(Apparence.DANGER);
     boutonEffacerTous.setForeground(Color.WHITE);
     boutonEffacerTous.addActionListener(e -> {
-      // on demande une confirmation forte car l'action est irréversible
+      // double confirmation parce que c'est irréversible
       int confirmation = JOptionPane.showConfirmDialog(this,
         "Êtes-vous absolument certain de vouloir supprimer TOUS les comptes non-administrateurs ?\n"
           + "Cette action est irréversible.",
         "Réinitialisation totale", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
       if (confirmation == JOptionPane.YES_OPTION) {
-        // supprime toutes les données des utilisateurs normaux
         GestionAuth.effacerDonneesUtilisateurs();
 
-        // si l'utilisateur connecté n'existe plus, on le sort du compte
+        // si l'utilisateur connecté a été effacé, on le déconnecte automatiquement
         if (fenetre.nomUtilisateurConnecte != null
           && !GestionAuth.obtenirTousLesNomsUtilisateurs().contains(fenetre.nomUtilisateurConnecte)) {
           fenetre.deconnecter();
         }
 
-        // mise à jour de l'affichage après la suppression
         actualiserListeUtilisateurs();
         JOptionPane.showMessageDialog(this, "Tous les comptes non-administrateurs ont été supprimés.");
       }
     });
 
-    // bouton spécial réservé à barbieri pour réinitialiser complètement le système
+
+    // --- bouton noir ultra-sensible, réservé à "barbieri" ---
+    // setVisible(false) le cache par défaut, actualiserListeUtilisateurs() le montre si besoin
     boutonReinitBarbieri = new JButton("Réinitialisation Totale (Barbieri)");
     boutonReinitBarbieri.setBackground(Color.BLACK);
     boutonReinitBarbieri.setForeground(Color.WHITE);
     boutonReinitBarbieri.setVisible(false);
     boutonReinitBarbieri.addActionListener(e -> {
-      // action très sensible, donc on redemande encore une confirmation
+      // ERROR_MESSAGE donne une icône d'erreur rouge pour bien montrer que c'est critique
       int confirmation = JOptionPane.showConfirmDialog(this,
         "ACTION CRITIQUE : Voulez-vous supprimer TOUS les comptes et réinitialiser les profils administrateurs ?\n"
           + "Cette action est irréversible.",
         "Réinitialisation totale", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
 
       if (confirmation == JOptionPane.YES_OPTION) {
-        // remise à zéro complète du système
-        GestionAuth.reinitialisationComplete();
+        GestionAuth.reinitialisationComplete(); // remet tout à l'état d'usine
         fenetre.deconnecter();
+        // null comme parent = la boîte apparaît au centre de l'écran
         JOptionPane.showMessageDialog(null, "Le système a été réinitialisé à son état d'usine.");
       }
     });
 
-    // ajoute les boutons à la barre du bas
+    // on ajoute les trois boutons dans la barre du bas
     panneauBoutons.add(boutonSupprimer);
     panneauBoutons.add(boutonEffacerTous);
     panneauBoutons.add(boutonReinitBarbieri);
     add(panneauBoutons, BorderLayout.SOUTH);
 
-    // charge les comptes dès l'ouverture de la page
+    // on charge la liste tout de suite à l'ouverture
     actualiserListeUtilisateurs();
   }
 
-  // recharge la liste avec les comptes non administrateurs
+
+  // rafraîchit la liste et gère la visibilité du bouton barbieri
   public void actualiserListeUtilisateurs() {
-    // le bouton spécial apparaît seulement si barbieri est connecté
+    // le bouton noir n'apparaît que si "barbieri" est connecté
     if (boutonReinitBarbieri != null && fenetre.nomUtilisateurConnecte != null) {
       boutonReinitBarbieri.setVisible(fenetre.nomUtilisateurConnecte.equals("barbieri"));
     }
 
-    // vide l'ancienne liste avant de la reconstruire
-    modeleListeUtilisateurs.clear();
+    modeleListeUtilisateurs.clear(); // vide l'ancienne liste
 
-    // ajoute chaque compte non-admin avec quelques détails utiles
+    // on reconstruit la liste avec les comptes non-admin et leurs infos
     for (String nom : GestionAuth.obtenirNomsNonAdmin()) {
       DonneesUtilisateur donnees = GestionAuth.obtenirProfilUtilisateur(nom);
       String entree = nom;
 
       if (donnees != null) {
-        // on affiche aussi le nom complet, l'âge, le ratio investissement/épargne et l'occupation
+        // format : "nomUtilisateur (nomAffichage, X ans, Y% investissement / Z% épargne, occupation)"
         entree += " (" + donnees.nomAffichage + ", " + donnees.age + " ans, "
           + donnees.pourcentInvestissement + "% investissement / "
           + (100 - donnees.pourcentInvestissement) + "% épargne, " + donnees.occupation + ")";
