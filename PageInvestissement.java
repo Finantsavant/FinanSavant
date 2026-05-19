@@ -30,12 +30,11 @@ class PageInvestissement extends JPanel {
     panneauHaut.add(titre);
     add(panneauHaut, BorderLayout.NORTH);
 
-    JPanel conteneurPrincipal = new JPanel(new GridBagLayout());
+    JPanel conteneurPrincipal = new JPanel();
     conteneurPrincipal.setOpaque(false);
-    GridBagConstraints contraintes = new GridBagConstraints();
-    contraintes.insets = new Insets(10, 10, 10, 10);
-    contraintes.fill = GridBagConstraints.HORIZONTAL;
+    conteneurPrincipal.setLayout(new BoxLayout(conteneurPrincipal, BoxLayout.Y_AXIS));
 
+    // --- Rangée tolérance au risque ---
     JPanel panneauRisque = new JPanel(new FlowLayout(FlowLayout.CENTER));
     panneauRisque.setOpaque(false);
     panneauRisque.add(new JLabel("Tolérance au risque :"));
@@ -46,14 +45,9 @@ class PageInvestissement extends JPanel {
     };
     boiteRisque = new JComboBox<>(risques);
     panneauRisque.add(boiteRisque);
-    contraintes.gridx = 0;
-    contraintes.gridy = 0;
-    contraintes.gridwidth = 2;
-    conteneurPrincipal.add(panneauRisque, contraintes);
+    conteneurPrincipal.add(panneauRisque);
 
-    contraintes.gridy++;
-    contraintes.gridwidth = 1;
-    contraintes.weightx = 0.6;
+    // --- Panneau des types d'investissements ---
     JPanel panneauTypes = new JPanel(new GridLayout(2, 3, 10, 10));
     panneauTypes.setOpaque(false);
     panneauTypes.setBorder(BorderFactory.createTitledBorder("Types d'investissements"));
@@ -69,11 +63,13 @@ class PageInvestissement extends JPanel {
     panneauTypes.add(caseObligations);
     panneauTypes.add(caseMatieresPremieres);
     panneauTypes.add(caseImmobilierCote);
-    conteneurPrincipal.add(panneauTypes, contraintes);
 
-    contraintes.gridy++;
-    contraintes.gridwidth = 2;
-    contraintes.weightx = 0;
+    JPanel panneauTypesWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    panneauTypesWrapper.setOpaque(false);
+    panneauTypesWrapper.add(panneauTypes);
+    conteneurPrincipal.add(panneauTypesWrapper);
+
+    // --- Bouton générer ---
     JPanel panneauBouton = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
     panneauBouton.setOpaque(false);
     JButton boutonGenerer = new JButton("Générer le plan");
@@ -82,7 +78,8 @@ class PageInvestissement extends JPanel {
     boutonGenerer.setForeground(Color.WHITE);
     boutonGenerer.setPreferredSize(new Dimension(240, 50));
     panneauBouton.add(boutonGenerer);
-    conteneurPrincipal.add(panneauBouton, contraintes);
+    conteneurPrincipal.add(panneauBouton);
+
     add(new JScrollPane(conteneurPrincipal), BorderLayout.CENTER);
 
     addAncestorListener(new javax.swing.event.AncestorListener() {
@@ -174,3 +171,4 @@ class PageInvestissement extends JPanel {
     JOptionPane.showMessageDialog(this, defilement, titre, JOptionPane.PLAIN_MESSAGE);
   }
 }
+
