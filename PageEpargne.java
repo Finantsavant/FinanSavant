@@ -1,46 +1,50 @@
-import javax.swing.*;
-import java.awt.*;
-import java.util.ArrayList;
+import javax.swing.*; 
+import java.awt.*; 
+import java.util.ArrayList; 
 
-/** Recommandation de comptes d'épargne canadiens selon la situation. */
+// Page qui recommande un compte d'épargne canadien à l'utilisateur
 class PageEpargne extends JPanel {
-  private JComboBox<String> boiteStatutProprietaire;
-  private JComboBox<String> boiteEpargneEtudesEnfants;
-  private JComboBox<String> boiteObjectifFinancierPrincipal;
-  private JButton boutonGenererPlan;
+  private JComboBox<String> boiteStatutProprietaire; 
+  private JComboBox<String> boiteEpargneEtudesEnfants; 
+  private JComboBox<String> boiteObjectifFinancierPrincipal; 
+  private JButton boutonGenererPlan; 
   private JButton boutonCompteHisa;
   private JButton boutonCompteCeli;
   private JButton boutonCompteReer;
   private JButton boutonCompteCeliapp;
   private JButton boutonCompteReee;
   private JButton boutonCompteReei;
-  private JLabel etiquetteCompteRecommande;
-  private JLabel etiquetteExplication;
-  private JTextArea zonePlanDetaille;
-  private final Color couleurSurbrillance = new Color(50, 200, 50);
-  private final Color couleurBoutonNormal = new Color(240, 240, 240);
-  private final FenetrePrincipale fenetrePrincipale;
-  private String compteRecommande = null;
+  private JLabel etiquetteCompteRecommande; 
+  private JLabel etiquetteExplication; 
+  private JTextArea zonePlanDetaille; // Grande zone de texte pour le plan généré
+  private final Color couleurSurbrillance = new Color(50, 200, 50); 
+  private final Color couleurBoutonNormal = new Color(240, 240, 240); 
+  private final FenetrePrincipale fenetrePrincipale; // Référence à la fenêtre principale pour naviguer
+  private String compteRecommande = null; // Garde en mémoire le compte recommandé
 
   public PageEpargne(FenetrePrincipale fenetre) {
     this.fenetrePrincipale = fenetre;
     setBackground(Apparence.FOND);
-    setLayout(new BorderLayout());
-    setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+    setLayout(new BorderLayout()); 
+    setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); 
 
-    JPanel panneauHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    panneauHaut.setOpaque(false);
+    // Barre du haut avec le bouton retour et le titre
+    JPanel panneauHaut = new JPanel(new FlowLayout(FlowLayout.LEFT)); 
+    panneauHaut.setOpaque(false); 
     JButton boutonRetour = new JButton("< Retour");
-    boutonRetour.addActionListener(e -> fenetrePrincipale.retourAccueil());
+    boutonRetour.addActionListener(e -> fenetrePrincipale.retourAccueil()); // Action événement
     panneauHaut.add(boutonRetour);
     JLabel titrePage = new JLabel("Plan d'épargne personnalisé");
     titrePage.setFont(Apparence.SOUS_TITRE);
     panneauHaut.add(titrePage);
     add(panneauHaut, BorderLayout.NORTH);
 
+    // Mini formulaire 
+    // GridLayout pour placer les composants dans une grille de 3 rangées et 2 colonnes
+    // Source: https://docs.oracle.com/javase/tutorial/uiswing/layout/grid.html
     JPanel panneauFormulaire = new JPanel(new GridLayout(3, 2, 8, 8));
     panneauFormulaire.setOpaque(false);
-    panneauFormulaire.setBorder(BorderFactory.createTitledBorder("Votre situation"));
+    panneauFormulaire.setBorder(BorderFactory.createTitledBorder("Votre situation")); // Cadre avec titre
     panneauFormulaire.add(new JLabel("Propriétaire d'une maison ?"));
     boiteStatutProprietaire = new JComboBox<>(new String[]{"Non", "Oui", "Je loue"});
     panneauFormulaire.add(boiteStatutProprietaire);
@@ -53,7 +57,8 @@ class PageEpargne extends JPanel {
     });
     panneauFormulaire.add(boiteObjectifFinancierPrincipal);
 
-    JPanel panneauComptes = new JPanel(new GridLayout(2, 3, 8, 8));
+    // Grille des 6 boutons de comptes disponibles
+    JPanel panneauComptes = new JPanel(new GridLayout(2, 3, 8, 8)); 
     panneauComptes.setOpaque(false);
     panneauComptes.setBorder(BorderFactory.createTitledBorder("Comptes disponibles"));
     boutonCompteHisa = creerBoutonCompte("HISA", "Intérêt élevé");
@@ -69,17 +74,20 @@ class PageEpargne extends JPanel {
     panneauComptes.add(boutonCompteReee);
     panneauComptes.add(boutonCompteReei);
 
+    // BoxLayout.Y_AXIS empile les éléments de haut en bas
+    // Source: https://docs.oracle.com/javase/tutorial/uiswing/layout/border.html
     JPanel panneauCentre = new JPanel();
     panneauCentre.setOpaque(false);
     panneauCentre.setLayout(new BoxLayout(panneauCentre, BoxLayout.Y_AXIS));
     panneauCentre.add(panneauFormulaire);
-    panneauCentre.add(Box.createRigidArea(new Dimension(0, 12)));
+    panneauCentre.add(Box.createRigidArea(new Dimension(0, 12))); // Espace fixe entre les sections
     panneauCentre.add(panneauComptes);
     panneauCentre.add(Box.createRigidArea(new Dimension(0, 12)));
 
+    // Section qui affiche la recommandation
     JPanel panneauRecommandation = new JPanel(new GridLayout(2, 1));
     panneauRecommandation.setOpaque(false);
-    panneauRecommandation.setBorder(BorderFactory.createTitledBorder("Recommandation"));
+    panneauRecommandation.setBorder(BorderFactory.createTitledBorder("Recommandation")); // Méthode borderFactory, Source: https://docs.oracle.com/javase/8/docs/api/javax/swing/BorderFactory.html
     etiquetteCompteRecommande = new JLabel("Compte recommandé : choisissez vos réponses");
     etiquetteExplication = new JLabel(" ");
     panneauRecommandation.add(etiquetteCompteRecommande);
@@ -87,49 +95,61 @@ class PageEpargne extends JPanel {
     panneauCentre.add(panneauRecommandation);
     add(panneauCentre, BorderLayout.CENTER);
 
+    // Partie basse: bouton et zone de texte avec scroll
     JPanel panneauBas = new JPanel(new BorderLayout(0, 10));
     panneauBas.setOpaque(false);
     boutonGenererPlan = new JButton("Générer le plan");
     boutonGenererPlan.setFont(Apparence.SOUS_TITRE);
     boutonGenererPlan.setBackground(Apparence.SECONDAIRE);
     boutonGenererPlan.setForeground(Color.WHITE);
+
     JPanel panneauBouton = new JPanel(new FlowLayout(FlowLayout.CENTER));
     panneauBouton.setOpaque(false);
     panneauBouton.add(boutonGenererPlan);
     panneauBas.add(panneauBouton, BorderLayout.NORTH);
 
+    // Zone de texte pour afficher le plan généré
     zonePlanDetaille = new JTextArea(10, 40);
-    zonePlanDetaille.setEditable(false);
-    zonePlanDetaille.setLineWrap(true);
-    zonePlanDetaille.setWrapStyleWord(true);
+    zonePlanDetaille.setEditable(false); // L'utilisateur ne peut pas modifier le texte
+    zonePlanDetaille.setLineWrap(true); 
+    zonePlanDetaille.setWrapStyleWord(true); 
     zonePlanDetaille.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    zonePlanDetaille.setMargin(new Insets(10, 10, 10, 10));
+    zonePlanDetaille.setMargin(new Insets(10, 10, 10, 10)); // Espace intérieur (haut, gauche, bas, droite)
     zonePlanDetaille.setText("Cliquez sur « Générer le plan » pour afficher votre plan d'épargne.");
+
+    // JScrollPane ajoute des barres de défilement si le texte dépasse la zone
+    // Source: https://docs.oracle.com/javase/tutorial/uiswing/components/scrollpane.html
     JScrollPane defilementPlan = new JScrollPane(zonePlanDetaille);
-    defilementPlan.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    defilementPlan.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER); // Pas de scroll horizontal
     panneauBas.add(defilementPlan, BorderLayout.CENTER);
+
     add(panneauBas, BorderLayout.SOUTH);
 
+    // Remet à jour la recommandation chaque fois qu'un menu change
     boiteStatutProprietaire.addActionListener(e -> mettreAJourRecommandation());
     boiteEpargneEtudesEnfants.addActionListener(e -> mettreAJourRecommandation());
     boiteObjectifFinancierPrincipal.addActionListener(e -> mettreAJourRecommandation());
     boutonGenererPlan.addActionListener(e -> genererPlanDetaille());
-    mettreAJourRecommandation();
+    mettreAJourRecommandation(); // Calcule la reco dès l'ouverture de la page
   }
 
+  // Crée un bouton avec le nom du compte et une courte description sur 2 lignes (HTML dans Swing)
+  // https://stackoverflow.com/questions/1090098/newline-in-jlabel
   private JButton creerBoutonCompte(String nomCourt, String description) {
     JButton bouton = new JButton("<html><center>" + nomCourt + "<br><font size='1'>"
       + description + "</font></center></html>");
     bouton.setFont(new Font("Arial", Font.PLAIN, 11));
-    bouton.setFocusPainted(false);
+    bouton.setFocusPainted(false); // Enlève le rectangle de focus sur le bouton
     bouton.setBackground(couleurBoutonNormal);
     return bouton;
   }
 
+  // Remet tous les boutons en gris, puis met en vert seulement le compte recommandé
   private void mettreCompteEnSurbrillance(String compte) {
     JButton[] comptes = {boutonCompteHisa, boutonCompteCeli, boutonCompteReer,
       boutonCompteCeliapp, boutonCompteReee, boutonCompteReei};
-    for (JButton bouton : comptes) bouton.setBackground(couleurBoutonNormal);
+    for (JButton bouton : comptes) bouton.setBackground(couleurBoutonNormal); // Reset tous
+
     switch (compte) {
       case "HISA": boutonCompteHisa.setBackground(couleurSurbrillance); break;
       case "CELI": boutonCompteCeli.setBackground(couleurSurbrillance); break;
@@ -140,14 +160,19 @@ class PageEpargne extends JPanel {
     }
   }
 
+  // Lit les réponses des menus et le profil de l'utilisateur pour choisir le meilleur compte
   private void mettreAJourRecommandation() {
     String statutProprietaire = (String) boiteStatutProprietaire.getSelectedItem();
     String epargneEtudes = (String) boiteEpargneEtudesEnfants.getSelectedItem();
     String objectifPrincipal = (String) boiteObjectifFinancierPrincipal.getSelectedItem();
     String nomUtilisateur = fenetrePrincipale.nomUtilisateurConnecte;
     DonneesUtilisateur donneesUtilisateur = GestionAuth.obtenirProfilUtilisateur(nomUtilisateur);
+
+    // Si le profil est null (utilisateur pas connecté), on met des valeurs par défaut
     int ageUtilisateur = (donneesUtilisateur != null) ? donneesUtilisateur.age : 30;
     String occupationUtilisateur = (donneesUtilisateur != null) ? donneesUtilisateur.occupation : "Temps plein";
+
+    // Logique de recommandation selon les réponses et le profil
     if (objectifPrincipal.equals("Acheter maison") && !statutProprietaire.equals("Oui")) {
       compteRecommande = "CELIAPP";
       etiquetteExplication.setText("Le CELIAPP est idéal pour constituer votre apport initial.");
@@ -169,6 +194,7 @@ class PageEpargne extends JPanel {
       compteRecommande = "HISA";
       etiquetteExplication.setText("Le HISA apporte stabilité et liquidité à votre épargne.");
     }
+
     etiquetteCompteRecommande.setText("Compte recommandé : " + compteRecommande);
     mettreCompteEnSurbrillance(compteRecommande);
   }
@@ -179,14 +205,20 @@ class PageEpargne extends JPanel {
       zonePlanDetaille.setText("Veuillez vous connecter pour générer un plan d'épargne.");
       return;
     }
+
     DonneesUtilisateur donneesUtilisateur = GestionAuth.obtenirProfilUtilisateur(nomUtilisateur);
     if (donneesUtilisateur == null) {
       zonePlanDetaille.setText("Profil utilisateur introuvable.");
       return;
     }
+
     ArrayList<Objectif> listeObjectifs = donneesUtilisateur.objectifs;
     String objectifPrincipal = (String) boiteObjectifFinancierPrincipal.getSelectedItem();
+
+    // StringBuilder est plus efficace que de concaténer des String avec + en boucle
+    // https://stackoverflow.com/questions/1532461/stringbuilder-vs-string-concatenation-in-tostring-in-java
     StringBuilder plan = new StringBuilder();
+
     plan.append("========== PLAN D'ÉPARGNE PERSONNALISÉ ==========\n\n");
     plan.append("PROFIL UTILISATEUR\n");
     plan.append("Âge : ").append(donneesUtilisateur.age).append(" ans\n");
@@ -198,6 +230,7 @@ class PageEpargne extends JPanel {
     if (!listeObjectifs.isEmpty()) {
       plan.append("VOS OBJECTIFS\n");
       for (Objectif objectif : listeObjectifs) {
+        // Convertit les mois en années + mois restants pour afficher "1 an et 3 mois"
         int moisRequis = objectif.obtenirMoisNecessaires();
         int anneesRequis = moisRequis / 12;
         int moisRestants = moisRequis % 12;
@@ -205,6 +238,9 @@ class PageEpargne extends JPanel {
         if (anneesRequis > 0) temps += anneesRequis + " an" + (anneesRequis > 1 ? "s" : "");
         if (anneesRequis > 0 && moisRestants > 0) temps += " et ";
         if (moisRestants > 0 || anneesRequis == 0) temps += moisRestants + " mois";
+
+        // String.format("%.0f") formate un double en entier sans décimales
+        // https://docs.oracle.com/javase/tutorial/java/data/numberformat.html
         plan.append("- ").append(objectif.nom).append(": ");
         plan.append(String.format("%.0f", objectif.montantTotal)).append("$ (");
         plan.append(String.format("%.0f", objectif.epargneMensuelle)).append("$/mois) - ");
@@ -214,6 +250,8 @@ class PageEpargne extends JPanel {
     } else {
       plan.append("ASTUCE : Allez dans « Mes Objectifs » pour créer votre premier objectif !\n\n");
     }
+
+    // Conseils personnalisés selon l'âge
     plan.append("CONSEILS\n");
     if (donneesUtilisateur.age < 30) {
       plan.append("- Commencez tôt pour profiter des intérêts composés\n");
@@ -225,10 +263,12 @@ class PageEpargne extends JPanel {
       plan.append("- Privilégiez la préservation du capital\n");
       plan.append("- Le CELI est avantageux pour les retraits libres d'impôt\n");
     }
+
     plan.append("\n==================================================\n");
     plan.append("Outil éducatif — Consultez un conseiller financier\n");
     plan.append("==================================================");
+
     zonePlanDetaille.setText(plan.toString());
-    zonePlanDetaille.setCaretPosition(0);
+    zonePlanDetaille.setCaretPosition(0); // Remet le scroll en haut du texte
   }
 }
