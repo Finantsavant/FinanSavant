@@ -4,27 +4,46 @@ import java.util.Scanner;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * FORMAT DU FICHIER utilisateurs.txt :
- * nom_utilisateur | mot_de_passe | est_admin(1/0) | nom_affichage | âge | %_investissement | occupation | [objectifs]
- * Objectifs : nom : montant_total : épargne_mensuelle (séparés par ';' entre objectifs)
- */
+// Classe qui gère les comptes d'utilisateurs. 
+// Elle permet l’authentification, l’enregistrement des profils et tout informations est sauvegarder dans un fichier txt.
+// Format du utilisateurs.txt :
+// nom_utilisateur | mot_de_passe | est_admin(1/0) | nom_affichage | âge | %_investissement | occupation | [objectifs]
+// "|" est utiliser pour les sections car ";" est utiliser dans PageObjectif
+// Les objectifs sont enregistrés sous la forme :
+// nom : montant_total : epargne_mensuelle
+
 class GestionAuth {
   private static final String FICHIER_UTILISATEURS = "utilisateurs.txt";
+
+  // Structure de données utilisée pour stocker les utilisateurs et mots de passe en utilisant HashMap.
+  // HashMap permet d’associer une clé (nom utilisateur) à une valeur (mot de passe) pour un accès rapide.
+  // Sources :
+  // https://www.w3schools.com/java/java_hashmap.asp
+  // https://stackoverflow.com/questions/73364087/java-hasmaps-for-login-system
+  // https://forums.oracle.com/ords/apexds/post/java-login-using-a-hashmap-2802
+  // https://www.youtube.com/watch?v=D3x6otiCR3g
+  private static HashMap<String, String> utilisateurs = new HashMap<>();
+  // HashSet utilisé pour stocker les administrateurs uniques.
+  // Source : https://www.w3schools.com/java/java_hashset.asp
+  private static HashSet<String> administrateurs = new HashSet<>();
   private static HashMap<String, String> utilisateurs = new HashMap<>();
   private static HashSet<String> administrateurs = new HashSet<>();
   private static HashMap<String, DonneesUtilisateur> profils = new HashMap<>();
+  // Liste des utilisateurs prédéfini qui ont accèss au fonctions administrateurs
   private static final String[][] ADMINS_PAR_DEFAUT = {
     {"barbieri", "1234"}, {"abdeck", "1234"}, {"daniel", "1234"}, {"sebiota", "1234"}, {"kenji", "1234"}
   };
+  // Expression utilisée pour séparer les données du fichier txt.
   private static final String DELIMITEUR_REGEX = "\\|";
+  // Délimiteur utilisé lors de l’écriture dans le fichier txt.
   private static final String DELIMITEUR = "|";
 
   static {
     chargerDonnees();
   }
-
+  // Charge toutes les données des utilisateurs à partir du fichier texte.
   private static void chargerDonnees() {
+    // Définition d’un objet qui représente le fichier principal.
     File fichier = new File(FICHIER_UTILISATEURS);
     if (!fichier.exists()) {
       File ancienFichier = new File("users.txt");
