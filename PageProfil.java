@@ -24,8 +24,8 @@ class PageProfil extends JPanel {
   JButton boutonSauvegarder = new JButton("Sauvegarder");
   CardLayout dispositionCartes = new CardLayout();
   JPanel panneauCartes = new JPanel(dispositionCartes);
-  JPanel carteConnexion = new JPanel(new GridBagLayout());
-  JPanel carteProfil = new JPanel(new GridBagLayout());
+  JPanel carteConnexion = new JPanel();
+  JPanel carteProfil = new JPanel();
   private String utilisateurCourant = null;
   private final FenetrePrincipale fenetre;
 
@@ -42,61 +42,51 @@ class PageProfil extends JPanel {
     barreHaut.add(boutonRetour);
     add(barreHaut, BorderLayout.NORTH);
 
+    // --- Carte Connexion : rows of label + field stacked vertically ---
     carteConnexion.setBackground(Apparence.FOND);
-    GridBagConstraints contraintesConnexion = new GridBagConstraints();
-    contraintesConnexion.insets = new Insets(10, 10, 10, 10);
-    contraintesConnexion.gridx = 0;
-    contraintesConnexion.gridy = 0;
-    contraintesConnexion.anchor = GridBagConstraints.EAST;
-    carteConnexion.add(new JLabel("Nom d'utilisateur :"), contraintesConnexion);
-    contraintesConnexion.gridx = 1;
-    contraintesConnexion.anchor = GridBagConstraints.WEST;
-    carteConnexion.add(champUtilisateur, contraintesConnexion);
-    contraintesConnexion.gridx = 0;
-    contraintesConnexion.gridy++;
-    contraintesConnexion.anchor = GridBagConstraints.EAST;
-    carteConnexion.add(new JLabel("Mot de passe :"), contraintesConnexion);
-    contraintesConnexion.gridx = 1;
-    contraintesConnexion.anchor = GridBagConstraints.WEST;
-    carteConnexion.add(champMotDePasse, contraintesConnexion);
-    contraintesConnexion.gridx = 0;
-    contraintesConnexion.gridy++;
-    contraintesConnexion.gridwidth = 2;
-    contraintesConnexion.anchor = GridBagConstraints.CENTER;
+    carteConnexion.setLayout(new BoxLayout(carteConnexion, BoxLayout.Y_AXIS));
+
+    JPanel ligneUtilisateur = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+    ligneUtilisateur.setOpaque(false);
+    ligneUtilisateur.add(new JLabel("Nom d'utilisateur :"));
+    ligneUtilisateur.add(champUtilisateur);
+    carteConnexion.add(ligneUtilisateur);
+
+    JPanel ligneMotDePasse = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+    ligneMotDePasse.setOpaque(false);
+    ligneMotDePasse.add(new JLabel("Mot de passe :"));
+    ligneMotDePasse.add(champMotDePasse);
+    carteConnexion.add(ligneMotDePasse);
+
     JPanel ligneBoutons = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
     ligneBoutons.setOpaque(false);
     ligneBoutons.add(boutonConnexion);
     ligneBoutons.add(boutonInscription);
-    carteConnexion.add(ligneBoutons, contraintesConnexion);
-    contraintesConnexion.gridy++;
-    carteConnexion.add(messageConnexion, contraintesConnexion);
+    carteConnexion.add(ligneBoutons);
 
+    JPanel ligneMessage = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    ligneMessage.setOpaque(false);
+    ligneMessage.add(messageConnexion);
+    carteConnexion.add(ligneMessage);
+
+    // --- Carte Profil : rows stacked vertically ---
     carteProfil.setBackground(Apparence.FOND);
-    GridBagConstraints contraintesProfil = new GridBagConstraints();
-    contraintesProfil.insets = new Insets(5, 5, 5, 5);
-    contraintesProfil.gridx = 0;
-    contraintesProfil.gridy = 0;
-    contraintesProfil.anchor = GridBagConstraints.EAST;
-    carteProfil.add(etiquetteNom, contraintesProfil);
-    contraintesProfil.gridx = 1;
-    contraintesProfil.anchor = GridBagConstraints.WEST;
-    carteProfil.add(champNom, contraintesProfil);
-    contraintesProfil.gridx = 0;
-    contraintesProfil.gridy++;
-    contraintesProfil.anchor = GridBagConstraints.EAST;
-    carteProfil.add(etiquetteAge, contraintesProfil);
-    contraintesProfil.gridx = 1;
-    contraintesProfil.anchor = GridBagConstraints.WEST;
-    carteProfil.add(champAge, contraintesProfil);
-    contraintesProfil.gridx = 0;
-    contraintesProfil.gridy++;
-    contraintesProfil.anchor = GridBagConstraints.EAST;
-    carteProfil.add(etiquetteRepartition, contraintesProfil);
-    contraintesProfil.gridx = 1;
-    contraintesProfil.anchor = GridBagConstraints.WEST;
-    contraintesProfil.fill = GridBagConstraints.HORIZONTAL;
-    carteProfil.add(curseurRepartition, contraintesProfil);
-    contraintesProfil.gridy++;
+    carteProfil.setLayout(new BoxLayout(carteProfil, BoxLayout.Y_AXIS));
+
+    JPanel ligneNom = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+    ligneNom.setOpaque(false);
+    ligneNom.add(etiquetteNom);
+    ligneNom.add(champNom);
+    carteProfil.add(ligneNom);
+
+    JPanel ligneAge = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+    ligneAge.setOpaque(false);
+    ligneAge.add(etiquetteAge);
+    ligneAge.add(champAge);
+    carteProfil.add(ligneAge);
+
+    JPanel ligneRepartition = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+    ligneRepartition.setOpaque(false);
     curseurRepartition.setBackground(Apparence.FOND);
     curseurRepartition.setMajorTickSpacing(25);
     curseurRepartition.setMinorTickSpacing(5);
@@ -104,27 +94,30 @@ class PageProfil extends JPanel {
     curseurRepartition.setPaintLabels(true);
     curseurRepartition.setPreferredSize(new Dimension(400, 50));
     curseurRepartition.addChangeListener(e -> mettreAJourEtiquetteCurseur());
-    contraintesProfil.gridx = 0;
-    contraintesProfil.gridy++;
-    contraintesProfil.gridwidth = 2;
-    contraintesProfil.anchor = GridBagConstraints.CENTER;
-    contraintesProfil.fill = GridBagConstraints.NONE;
-    carteProfil.add(etiquetteCurseur, contraintesProfil);
-    contraintesProfil.gridwidth = 1;
-    contraintesProfil.gridy++;
-    contraintesProfil.gridx = 0;
-    contraintesProfil.anchor = GridBagConstraints.EAST;
-    carteProfil.add(etiquetteOccupation, contraintesProfil);
-    contraintesProfil.gridx = 1;
-    contraintesProfil.anchor = GridBagConstraints.WEST;
-    carteProfil.add(listeOccupation, contraintesProfil);
-    contraintesProfil.gridx = 0;
-    contraintesProfil.gridy++;
-    contraintesProfil.gridwidth = 2;
-    contraintesProfil.anchor = GridBagConstraints.CENTER;
-    carteProfil.add(boutonSauvegarder, contraintesProfil);
-    contraintesProfil.gridy++;
-    carteProfil.add(messageErreur, contraintesProfil);
+    ligneRepartition.add(etiquetteRepartition);
+    ligneRepartition.add(curseurRepartition);
+    carteProfil.add(ligneRepartition);
+
+    JPanel ligneCurseurLabel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    ligneCurseurLabel.setOpaque(false);
+    ligneCurseurLabel.add(etiquetteCurseur);
+    carteProfil.add(ligneCurseurLabel);
+
+    JPanel ligneOccupation = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+    ligneOccupation.setOpaque(false);
+    ligneOccupation.add(etiquetteOccupation);
+    ligneOccupation.add(listeOccupation);
+    carteProfil.add(ligneOccupation);
+
+    JPanel ligneSauvegarder = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    ligneSauvegarder.setOpaque(false);
+    ligneSauvegarder.add(boutonSauvegarder);
+    carteProfil.add(ligneSauvegarder);
+
+    JPanel ligneErreur = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    ligneErreur.setOpaque(false);
+    ligneErreur.add(messageErreur);
+    carteProfil.add(ligneErreur);
 
     panneauCartes.add(carteConnexion, "CONNEXION");
     panneauCartes.add(carteProfil, "PROFIL");
@@ -231,3 +224,4 @@ class PageProfil extends JPanel {
     champNom.setEditable(true);
   }
 }
+
