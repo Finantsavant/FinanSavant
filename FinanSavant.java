@@ -1429,157 +1429,111 @@ class PageInvestissement extends JPanel {
 }
 // Recommande le meilleur type de compte d'épargne canadien (CELI, REER, CELIAPP, etc.) selon la situation.
 class PageEpargne extends JPanel {
- private JComboBox < String > boiteStatutProprietaire;
- private JComboBox < String > boiteEpargneEtudesEnfants;
- private JComboBox < String > boiteObjectifFinancierPrincipal;
+ private JComboBox<String> boiteStatutProprietaire;
+ private JComboBox<String> boiteEpargneEtudesEnfants;
+ private JComboBox<String> boiteObjectifFinancierPrincipal;
+ private JButton boutonGenererPlan;
  private JButton boutonCompteHisa;
  private JButton boutonCompteTfsa;
  private JButton boutonCompteRrsp;
  private JButton boutonCompteFhsa;
  private JButton boutonCompteResp;
  private JButton boutonCompteRdsp;
- private JButton boutonGenererPlan;
  private JLabel etiquetteCompteRecommande;
  private JLabel etiquetteExplication;
  private JTextArea zonePlanDetaille;
  private final Color COULEUR_SURBRILLANCE = new Color(50, 200, 50);
- private final Color COULEUR_BOUTON_NORMAL = new Color(240, 240, 240); // Gris clair par défaut.
-  private FenetrePrincipale fenetrePrincipale;
-  private String compteRecommande = null;
+ private final Color COULEUR_BOUTON_NORMAL = new Color(240, 240, 240);
+ private FenetrePrincipale fenetrePrincipale;
+ private String compteRecommande = null;
   public PageEpargne(FenetrePrincipale frame) {
    this.fenetrePrincipale = frame;
+   setBackground(Theme.BG);
    setLayout(new BorderLayout());
-   JPanel panneauHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
-   panneauHaut.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
-   JButton boutonRetourAccueil = new JButton("←");
-   boutonRetourAccueil.setFont(new Font("Arial", Font.BOLD, 20));
-   boutonRetourAccueil.setPreferredSize(new Dimension(50, 35));
-   boutonRetourAccueil.setToolTipText("Retour à l'accueil");
-   boutonRetourAccueil.addActionListener(e -> fenetrePrincipale.retourAccueil());
-   panneauHaut.add(boutonRetourAccueil);
+   setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+   JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+   topPanel.setOpaque(false);
+   JButton backBtn = new JButton("< Retour");
+   backBtn.addActionListener(e -> fenetrePrincipale.retourAccueil());
+   topPanel.add(backBtn);
    JLabel titrePage = new JLabel("Plan d'épargne personnalisé");
-   titrePage.setFont(new Font("Arial", Font.BOLD, 16));
-   panneauHaut.add(titrePage);
-   add(panneauHaut, BorderLayout.NORTH);
-   // ==================== PANNEAU PRINCIPAL ====================
-   JPanel panneauPrincipal = new JPanel();
-   // BoxLayout Y_AXIS = empile les panneaux verticalement un sous l'autre (comme une colonne flex)
-   panneauPrincipal.setLayout(new BoxLayout(panneauPrincipal, BoxLayout.Y_AXIS));
-   panneauPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-   // ==================== SECTION QUESTIONS (plus compacte) ====================
-   JPanel panneauQuestions = new JPanel();
-   panneauQuestions.setLayout(new GridLayout(3, 2, 8, 8));
-   panneauQuestions.setBorder(BorderFactory.createTitledBorder("Votre situation"));
-   // Integer.MAX_VALUE = largeur "infinie" mais hauteur max 110 — trick pour que BoxLayout respecte la taille
-   panneauQuestions.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
-   // Question 1
-   JLabel etiquetteProprietaire = new JLabel("Propriétaire d'une maison ? :");
-   etiquetteProprietaire.setFont(new Font("Arial", Font.PLAIN, 11));
-   String[] optionsProprietaire = {
-     "Non",
-     "Oui",
-     "Je loue"
-   };
-   boiteStatutProprietaire = new JComboBox < > (optionsProprietaire);
-   boiteStatutProprietaire.setFont(new Font("Arial", Font.PLAIN, 11));
-   panneauQuestions.add(etiquetteProprietaire);
-   panneauQuestions.add(boiteStatutProprietaire);
-   JLabel etiquetteEtudesEnfants = new JLabel("Épargne pour études d'enfant ? :"); etiquetteEtudesEnfants.setFont(new Font("Arial", Font.PLAIN, 11));
-   String[] optionsEtudes = {
-     "Non",
-     "Oui, un enfant",
-     "Oui, plusieurs"
-   };
-   boiteEpargneEtudesEnfants = new JComboBox < > (optionsEtudes);
-   boiteEpargneEtudesEnfants.setFont(new Font("Arial", Font.PLAIN, 11));
-   panneauQuestions.add(etiquetteEtudesEnfants);
-   panneauQuestions.add(boiteEpargneEtudesEnfants);
-   JLabel etiquetteObjectif = new JLabel("Objectif financier principal :");
-   etiquetteObjectif.setFont(new Font("Arial", Font.PLAIN, 11));
-   String[] optionsObjectif = {
-     "Fonds d'urgence",
-     "Acheter maison",
-     "Retraite",
-     "Croître richesse",
-     "Études enfants",
-     "Revenu complémentaire"
-   };
-   boiteObjectifFinancierPrincipal = new JComboBox < > (optionsObjectif);
-   boiteObjectifFinancierPrincipal.setFont(new Font("Arial", Font.PLAIN, 11));
-   panneauQuestions.add(etiquetteObjectif);
-   panneauQuestions.add(boiteObjectifFinancierPrincipal);
-   panneauPrincipal.add(panneauQuestions);
-   panneauPrincipal.add(Box.createRigidArea(new Dimension(0, 8))); // espace vide fixe de 8px entre sections
-   JPanel panneauComptes = new JPanel();
-   panneauComptes.setLayout(new GridLayout(2, 3, 8, 8));
-   panneauComptes.setBorder(BorderFactory.createTitledBorder("Comptes disponibles"));
-   panneauComptes.setMaximumSize(new Dimension(Integer.MAX_VALUE, 130));
+   titrePage.setFont(Theme.SUBTITLE);
+   topPanel.add(titrePage);
+   add(topPanel, BorderLayout.NORTH);
+
+   JPanel formPanel = new JPanel(new GridLayout(3, 2, 8, 8));
+   formPanel.setOpaque(false);
+   formPanel.setBorder(BorderFactory.createTitledBorder("Votre situation"));
+   formPanel.add(new JLabel("Propriétaire d'une maison ?"));
+   boiteStatutProprietaire = new JComboBox<>(new String[]{"Non", "Oui", "Je loue"});
+   formPanel.add(boiteStatutProprietaire);
+   formPanel.add(new JLabel("Épargne pour études d'enfant ?"));
+   boiteEpargneEtudesEnfants = new JComboBox<>(new String[]{"Non", "Oui, un enfant", "Oui, plusieurs"});
+   formPanel.add(boiteEpargneEtudesEnfants);
+   formPanel.add(new JLabel("Objectif financier principal"));
+   boiteObjectifFinancierPrincipal = new JComboBox<>(new String[]{"Fonds d'urgence", "Acheter maison", "Retraite", "Croître richesse", "Études enfants", "Revenu complémentaire"});
+   formPanel.add(boiteObjectifFinancierPrincipal);
+
+   JPanel comptePanel = new JPanel(new GridLayout(2, 3, 8, 8));
+   comptePanel.setOpaque(false);
+   comptePanel.setBorder(BorderFactory.createTitledBorder("Comptes disponibles"));
    boutonCompteHisa = creerBoutonCompte("HISA", "Intérêt élevé");
    boutonCompteTfsa = creerBoutonCompte("TFSA", "Libre d'impôt");
    boutonCompteRrsp = creerBoutonCompte("RRSP", "Retraite");
    boutonCompteFhsa = creerBoutonCompte("FHSA", "Première maison");
    boutonCompteResp = creerBoutonCompte("RESP", "Études");
    boutonCompteRdsp = creerBoutonCompte("RDSP", "Invalidité");
-  
-   panneauComptes.add(boutonCompteHisa);
-   panneauComptes.add(boutonCompteTfsa);
-   panneauComptes.add(boutonCompteRrsp);
-   panneauComptes.add(boutonCompteFhsa);
-   panneauComptes.add(boutonCompteResp);
-   panneauComptes.add(boutonCompteRdsp);
-   panneauPrincipal.add(panneauComptes);
-   panneauPrincipal.add(Box.createRigidArea(new Dimension(0, 8))); // espace vide fixe de 8px entre sections
-   JPanel panneauRecommandation = new JPanel();
-   panneauRecommandation.setLayout(new BoxLayout(panneauRecommandation, BoxLayout.Y_AXIS));
-   panneauRecommandation.setBorder(BorderFactory.createTitledBorder("Recommandation"));
-   panneauRecommandation.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
-   etiquetteCompteRecommande = new JLabel("Sélectionnez vos options");
-   etiquetteCompteRecommande.setFont(new Font("Arial", Font.BOLD, 12));
-   etiquetteCompteRecommande.setAlignmentX(Component.CENTER_ALIGNMENT); // centre le label dans un BoxLayout
+   comptePanel.add(boutonCompteHisa);
+   comptePanel.add(boutonCompteTfsa);
+   comptePanel.add(boutonCompteRrsp);
+   comptePanel.add(boutonCompteFhsa);
+   comptePanel.add(boutonCompteResp);
+   comptePanel.add(boutonCompteRdsp);
+
+   JPanel centerPanel = new JPanel();
+   centerPanel.setOpaque(false);
+   centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+   centerPanel.add(formPanel);
+   centerPanel.add(Box.createRigidArea(new Dimension(0, 12)));
+   centerPanel.add(comptePanel);
+   centerPanel.add(Box.createRigidArea(new Dimension(0, 12)));
+
+   JPanel recommendationPanel = new JPanel(new GridLayout(2, 1));
+   recommendationPanel.setOpaque(false);
+   recommendationPanel.setBorder(BorderFactory.createTitledBorder("Recommandation"));
+   etiquetteCompteRecommande = new JLabel("Compte recommandé : choisissez vos réponses");
    etiquetteExplication = new JLabel(" ");
-   etiquetteExplication.setFont(new Font("Arial", Font.PLAIN, 10));
-   etiquetteExplication.setAlignmentX(Component.CENTER_ALIGNMENT);
-   panneauRecommandation.add(etiquetteCompteRecommande);
-   panneauRecommandation.add(Box.createRigidArea(new Dimension(0, 5)));
-   panneauRecommandation.add(etiquetteExplication);
-   panneauPrincipal.add(panneauRecommandation);
-   panneauPrincipal.add(Box.createRigidArea(new Dimension(0, 8))); // espace vide fixe de 8px entre sections
-   JPanel panneauBoutonGenerer = new JPanel(new FlowLayout(FlowLayout.CENTER));
-   panneauBoutonGenerer.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+   recommendationPanel.add(etiquetteCompteRecommande);
+   recommendationPanel.add(etiquetteExplication);
+   centerPanel.add(recommendationPanel);
+
+   add(centerPanel, BorderLayout.CENTER);
+
+   JPanel bottomPanel = new JPanel(new BorderLayout(0, 10));
+   bottomPanel.setOpaque(false);
    boutonGenererPlan = new JButton("Générer le plan");
-   boutonGenererPlan.setFont(new Font("Arial", Font.BOLD, 12));
-   boutonGenererPlan.setBackground(new Color(50, 100, 200));
-   boutonGenererPlan.setForeground(Color.BLACK);
-   boutonGenererPlan.setPreferredSize(new Dimension(180, 32));
-   boutonGenererPlan.setFocusPainted(false);
-   panneauBoutonGenerer.add(boutonGenererPlan);
-   panneauPrincipal.add(panneauBoutonGenerer);
-   panneauPrincipal.add(Box.createRigidArea(new Dimension(0, 8))); // espace vide fixe de 8px entre sections
-  
-   JPanel panneauPlanDetaille = new JPanel(); // Zone texte finale du plan.
-   panneauPlanDetaille.setLayout(new BorderLayout());
-   panneauPlanDetaille.setBorder(BorderFactory.createTitledBorder("Votre plan"));
-   zonePlanDetaille = new JTextArea(8, 40);
+   boutonGenererPlan.setFont(Theme.SUBTITLE);
+   boutonGenererPlan.setBackground(Theme.SECONDARY);
+   boutonGenererPlan.setForeground(Color.WHITE);
+   JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.CENTER));
+   buttonPane.setOpaque(false);
+   buttonPane.add(boutonGenererPlan);
+   bottomPanel.add(buttonPane, BorderLayout.NORTH);
+
+   zonePlanDetaille = new JTextArea(10, 40);
    zonePlanDetaille.setEditable(false);
-   zonePlanDetaille.setFont(new Font("Monospaced", Font.PLAIN, 10));
-   zonePlanDetaille.setMargin(new Insets(8, 8, 8, 8));
-   zonePlanDetaille.setText("Cliquez sur 'Générer le plan' pour voir votre plan d'épargne...");
    zonePlanDetaille.setLineWrap(true);
    zonePlanDetaille.setWrapStyleWord(true);
-   JScrollPane defilementPlan = new JScrollPane(zonePlanDetaille);
-   defilementPlan.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-   defilementPlan.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-   JScrollBar barreVerticale = defilementPlan.getVerticalScrollBar();
-   barreVerticale.setUnitIncrement(20);
-   panneauPlanDetaille.add(defilementPlan, BorderLayout.CENTER);
-   panneauPlanDetaille.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
-   panneauPrincipal.add(panneauPlanDetaille);
-  
-   JScrollPane defilementPrincipal = new JScrollPane(panneauPrincipal);
-   defilementPrincipal.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-   defilementPrincipal.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-   defilementPrincipal.getVerticalScrollBar().setUnitIncrement(20);
-   add(defilementPrincipal, BorderLayout.CENTER);
+   zonePlanDetaille.setFont(new Font("Monospaced", Font.PLAIN, 12));
+   zonePlanDetaille.setMargin(new Insets(10, 10, 10, 10));
+   zonePlanDetaille.setText("Cliquez sur 'Générer le plan' pour afficher votre plan d'épargne.");
+   JScrollPane scrollPlan = new JScrollPane(zonePlanDetaille);
+   scrollPlan.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+   bottomPanel.add(scrollPlan, BorderLayout.CENTER);
+
+   add(bottomPanel, BorderLayout.SOUTH);
+
    boiteStatutProprietaire.addActionListener(e -> mettreAJourRecommandation());
    boiteEpargneEtudesEnfants.addActionListener(e -> mettreAJourRecommandation());
    boiteObjectifFinancierPrincipal.addActionListener(e -> mettreAJourRecommandation());
@@ -1588,17 +1542,16 @@ class PageEpargne extends JPanel {
  }
  private JButton creerBoutonCompte(String nomCourt, String description) {
    JButton bouton = new JButton("<html><center>" + nomCourt + "<br><font size='1'>" + description + "</font></center></html>");
-   bouton.setFont(new Font("Arial", Font.PLAIN, 10));
-   bouton.setPreferredSize(new Dimension(100, 50)); bouton.setBackground(COULEUR_BOUTON_NORMAL);
-   bouton.setToolTipText(description); bouton.setFocusPainted(false);
+   bouton.setFont(new Font("Arial", Font.PLAIN, 11));
+   bouton.setFocusPainted(false);
+   bouton.setBackground(COULEUR_BOUTON_NORMAL);
    return bouton;
  }
- // Colore le bouton du compte suggéré en vert pour attirer l'oeil.
  private void mettreCompteEnSurbrillance(String compte) {
-   JButton[] bts = {boutonCompteHisa, boutonCompteTfsa, boutonCompteRrsp, boutonCompteFhsa, boutonCompteResp, boutonCompteRdsp};
-   for (JButton b : bts) b.setBackground(COULEUR_BOUTON_NORMAL);
-   if (compte != null) {
-     // switch pour colorer le bon bouton en vert selon le compte recommandé
+   JButton[] comptes = {boutonCompteHisa, boutonCompteTfsa, boutonCompteRrsp, boutonCompteFhsa, boutonCompteResp, boutonCompteRdsp};
+   for (JButton bouton : comptes) {
+     bouton.setBackground(COULEUR_BOUTON_NORMAL);
+   }
    switch (compte) {
      case "HISA": boutonCompteHisa.setBackground(COULEUR_SURBRILLANCE); break;
      case "TFSA": boutonCompteTfsa.setBackground(COULEUR_SURBRILLANCE); break;
@@ -1606,42 +1559,37 @@ class PageEpargne extends JPanel {
      case "FHSA": boutonCompteFhsa.setBackground(COULEUR_SURBRILLANCE); break;
      case "RESP": boutonCompteResp.setBackground(COULEUR_SURBRILLANCE); break;
      case "RDSP": boutonCompteRdsp.setBackground(COULEUR_SURBRILLANCE); break;
-     }
    }
  }
- // Logique de décision pour recommander le meilleur compte canadien selon les besoins de l'utilisateur.
+ // Logique de décision pour recommander le meilleur compte canadien selon la situation.
  private void mettreAJourRecommandation() {
    String statutProprietaire = (String) boiteStatutProprietaire.getSelectedItem();
    String epargneEtudes = (String) boiteEpargneEtudesEnfants.getSelectedItem();
    String objectifPrincipal = (String) boiteObjectifFinancierPrincipal.getSelectedItem();
    String nomUtilisateur = fenetrePrincipale.loggedInUsername;
-  DonneesUtilisateur donneesUtilisateur = GestionAuth.obtenirProfilUtilisateur(nomUtilisateur);
+   DonneesUtilisateur donneesUtilisateur = GestionAuth.obtenirProfilUtilisateur(nomUtilisateur);
    int ageUtilisateur = (donneesUtilisateur != null) ? donneesUtilisateur.age : 30;
    String occupationUtilisateur = (donneesUtilisateur != null) ? donneesUtilisateur.occupation : "Temps plein";
-   String compteRecommandeTemp = null;
-   String explicationTemp = "";
    if (objectifPrincipal.equals("Acheter maison") && !statutProprietaire.equals("Oui")) {
-     compteRecommandeTemp = "FHSA";
-     explicationTemp = "Le FHSA est parfait pour l'achat d'une première maison. Cotisation max: 8 000$/an.";
+     compteRecommande = "FHSA";
+     etiquetteExplication.setText("Le FHSA est idéal pour constituer votre apport initial.");
    } else if (!epargneEtudes.equals("Non")) {
-     compteRecommandeTemp = "RESP";
-     explicationTemp = "Le RESP offre 20% de subvention gouvernementale pour les études.";
+     compteRecommande = "RESP";
+     etiquetteExplication.setText("Le RESP aide à construire une réserve pour les études.");
    } else if (objectifPrincipal.equals("Retraite") && (ageUtilisateur >= 45 || occupationUtilisateur.equals("Temps plein"))) {
-     compteRecommandeTemp = "RRSP";
-     explicationTemp = "Le RRSP réduit votre revenu imposable pour la retraite.";
+     compteRecommande = "RRSP";
+     etiquetteExplication.setText("Le RRSP réduit votre impôt et soutient votre retraite.");
    } else if (ageUtilisateur < 40 && (objectifPrincipal.equals("Croître richesse") || objectifPrincipal.equals("Fonds d'urgence"))) {
-     compteRecommandeTemp = "TFSA";
-     explicationTemp = "Le TFSA permet une croissance totalement libre d'impôt.";
+     compteRecommande = "TFSA";
+     etiquetteExplication.setText("Le TFSA permet d'épargner sans impôt sur les gains.");
    } else if (objectifPrincipal.equals("Revenu complémentaire") && ageUtilisateur < 50) {
-     compteRecommandeTemp = "RDSP";
-     explicationTemp = "Le RDSP offre des subventions généreuses (jusqu'à 300%).";
+     compteRecommande = "RDSP";
+     etiquetteExplication.setText("Le RDSP aide à soutenir un revenu complémentaire à long terme.");
    } else {
-     compteRecommandeTemp = "HISA";
-     explicationTemp = "Le HISA est sécuritaire et accessible en tout temps.";
+     compteRecommande = "HISA";
+     etiquetteExplication.setText("Le HISA apporte stabilité et liquidité à votre épargne.");
    }
-   compteRecommande = compteRecommandeTemp;
    etiquetteCompteRecommande.setText("Compte recommandé : " + compteRecommande);
-   etiquetteExplication.setText("<html>" + explicationTemp + "</html>");
    mettreCompteEnSurbrillance(compteRecommande);
  }
  private void genererPlanDetaille() {
