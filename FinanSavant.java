@@ -40,57 +40,57 @@ class Theme {
  public static final Font BODY = new Font("Segoe UI", Font.PLAIN, 14);
 }
 // Classe d'entrée du programme (le point de départ quand tu run le .java)
-public class FinanSavant {
+ public class FinanSavant {
  public static void main(String[] args) {
    // SwingUtilities.invokeLater = PAS dans le cours mais important:
    // Swing doit tourner sur un thread spécial (EDT). Si tu crées la fenêtre dans main() direct,
    // parfois ça glitch ou freeze. invokeLater dit "fais ça sur le bon thread quand t'es prêt".
    // Le "()-> new MainFrame()" c'est une LAMBDA = fonction courte sans écrire une classe entière.
    // Le "e ->" qu'on voit partout c'est pareil: "quand l'événement e arrive, fais ce bloc".
-   SwingUtilities.invokeLater(() -> new MainFrame());
+   SwingUtilities.invokeLater(() -> new FenetrePrincipale());
  }
 }
 // AuthManager = classe statique qui gère login/register/fichier users.txt (pas un objet qu'on "new", tout est static)
-class AuthManager {
+class GestionAuth {
  // HashMap<String,String> = clé = nom d'utilisateur, valeur = mot de passe. .put() pour ajouter, .get() pour lire.
- private static HashMap < String, String > users = new HashMap < > ();
- // HashSet = juste des noms d'admins. .add() et .contains() — si le nom est déjà dedans, add() ne fait rien.
- private static HashSet < String > admins = new HashSet < > ();
- // Deuxième HashMap mais la valeur c'est un objet UserData (profil complet, pas juste le password)
- private static HashMap < String, UserData > profiles = new HashMap < > ();
-  // Liste des administrateurs par défaut.
- private static final String[][] DEFAULT_ADMINS = { {"barbieri", "1234"}, {"abdeck", "1234"}, {"daniel", "1234"}, {"sebiota", "1234"}, {"kenji", "1234"} };
+  private static HashMap < String, String > utilisateurs = new HashMap < > ();
+  // HashSet = juste des noms d'admins. .add() et .contains() — si le nom est déjà dedans, add() ne fait rien.
+  private static HashSet < String > administrateurs = new HashSet < > ();
+  // Deuxième HashMap mais la valeur c'est un objet DonneesUtilisateur (profil complet, pas juste le password)
+  private static HashMap < String, DonneesUtilisateur > profils = new HashMap < > ();
+   // Liste des administrateurs par défaut.
+  private static final String[][] ADMINS_PAR_DEFAUT = { {"barbieri", "1234"}, {"abdeck", "1234"}, {"daniel", "1234"}, {"sebiota", "1234"}, {"kenji", "1234"} };
  // Un REGEX est un modèle qui permet de découper du texte selon un symbole précis (ici la barre verticale |).
  // Regex (Regular Expressions) : Syntaxe pour rechercher et manipuler des chaînes de caractères.
  // Source : https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
  // DELIMITER_REGEX = "\\|" parce que en regex le | veut dire "OU", donc on l'échappe avec \\ pour couper SUR le |
- private static final String DELIMITER_REGEX = "\\|";
- private static final String DELIMITER = "|";
+  private static final String DELIMITEUR_REGEX = "\\|";
+  private static final String DELIMITEUR = "|";
  // Bloc static { } = s'exécute UNE FOIS quand la classe AuthManager est chargée (avant le main, en gros)
  // C'est comme un constructeur mais pour une classe full-static
- static {
-   loadData(); // Charge users.txt dans les HashMap dès que le programme démarre
- }
- private static void loadData() {
+  static {
+    chargerDonnees(); // Charge users.txt dans les HashMap dès que le programme démarre
+  }
+  private static void chargerDonnees() {
    File file = new File("users.txt");
    // Si le fichier n'existe pas, on crée les comptes de base et on sauvegarde.
-   if (!file.exists()) {
-     initDefaults();
-     saveData();
+    if (!file.exists()) {
+     initialiserParDefaut();
+     sauvegarderDonnees();
      return;
    }
    // try-with-resources (pas Scanner comme au cours — on utilise BufferedReader + FileReader):
    // Le cours dit Scanner + File, nous on lit ligne par ligne avec readLine() c'est plus clean pour des gros fichiers.
    // BufferedReader = lit par paquets (buffer) au lieu de caractère par caractère = plus rapide.
    // try ( ... ) = Java ferme br tout seul à la fin, même si ça crash (pas besoin de finally { br.close() })
-   try (BufferedReader br = new BufferedReader(new FileReader("users.txt"))) {
-     users.clear();
-     admins.clear();
-     profiles.clear();
+  try (BufferedReader br = new BufferedReader(new FileReader("users.txt"))) {
+   utilisateurs.clear();
+   administrateurs.clear();
+   profils.clear();
      String line;
      while ((line = br.readLine()) != null) {
        // Découpe la ligne en morceaux pour extraire chaque information.
-       String[] parts = line.split(DELIMITER_REGEX);
+      String[] parts = line.split(DELIMITEUR_REGEX);
        if (parts.length >= 7) {
          String username = parts[0], password = parts[1];
          boolean isAdmin = parts[2].equals("1");
@@ -106,11 +106,11 @@ class AuthManager {
            // catch vide = si le % investissement est pourri dans le fichier, on garde 50 par défaut et on continue
          }
          String occupation = parts[6];
-         users.put(username, password);
-         if (isAdmin) admins.add(username);
+         utilisateurs.put(username, password);
+         if (isAdmin) administrateurs.add(username);
         
          // Crée l'objet profil en mémoire.
-         UserData userData = new UserData(displayName, age, investPercent, occupation);
+         DonneesUtilisateur userData = new DonneesUtilisateur(displayName, age, investPercent, occupation);
         
          // Lecture des objectifs financiers s'ils existent (séparés par des points-virgules).
          if (parts.length >= 8 && !parts[7].isEmpty()) {
@@ -121,18 +121,18 @@ class AuthManager {
                String goalName = goalParts[0];
                double total = Double.parseDouble(goalParts[1]);
                double monthly = Double.parseDouble(goalParts[2]);
-               userData.goals.add(new Goal(goalName, total, monthly));
+               userData.goals.add(new Objectif(goalName, total, monthly));
              }
            }
          }
-         profiles.put(username, userData);
+         profils.put(username, userData);
        }
      }
      // Si des admins par défaut manquent dans le fichier, on les rajoute.
-     if (initDefaults()) saveData();
+    if (initialiserParDefaut()) sauvegarderDonnees();
    } catch (FileNotFoundException e) {
      // fichier disparu entre le exists() et l'ouverture — rare mais on recrée le fichier
-     saveData();
+     sauvegarderDonnees();
    } catch (NumberFormatException e) {
      System.err.println("Erreur de lecture : format de nombre incorrect.");
    } catch (IOException e) {
@@ -140,120 +140,120 @@ class AuthManager {
    }
  }
  // initDefaults = si barbieri/kenji/etc. manquent dans le fichier, on les recrée
- private static boolean initDefaults() {
-   boolean added = false;
-   for (String[] admin : DEFAULT_ADMINS) {
+ private static boolean initialiserParDefaut() {
+   boolean ajoute = false;
+   for (String[] admin : ADMINS_PAR_DEFAUT) {
      // On vérifie si le nom d'utilisateur existe déjà dans le dictionnaire.
-     if (!users.containsKey(admin[0])) {
-       users.put(admin[0], admin[1]); admins.add(admin[0]);
-       profiles.put(admin[0], new UserData(admin[0], 0, 50, ""));
-       added = true;
+     if (!utilisateurs.containsKey(admin[0])) {
+       utilisateurs.put(admin[0], admin[1]); administrateurs.add(admin[0]);
+       profils.put(admin[0], new DonneesUtilisateur(admin[0], 0, 50, ""));
+       ajoute = true;
      }
    }
-   return added;
+   return ajoute;
  }
  // saveData = écrit tout ce qu'il y a dans les HashMap vers users.txt (persistance = données survivent après fermeture)
- public static void saveData() {
+ public static void sauvegarderDonnees() {
    // PrintWriter + FileWriter = pour ÉCRIRE dans un fichier (le cours parle surtout de lire avec Scanner)
    try (PrintWriter pw = new PrintWriter(new FileWriter("users.txt"))) {
      // keySet() = toutes les clés du HashMap (tous les usernames). Boucle for-each du cours mais sur un Set de clés
-     for (String username: users.keySet()) {
-       String pass = users.get(username);
-       UserData ud = profiles.get(username);
+     for (String username: utilisateurs.keySet()) {
+       String pass = utilisateurs.get(username);
+       DonneesUtilisateur ud = profils.get(username);
        // Valeurs par défaut si le profil est vide.
-       if (ud == null) ud = new UserData(username, 0, 50, "");
+      if (ud == null) ud = new DonneesUtilisateur(username, 0, 50, "");
       
        // Opérateur ternaire ? : = mini if sur une ligne (pas toujours au cours mais super commun)
-       int isAdmin = admins.contains(username) ? 1 : 0;
+      int isAdmin = administrateurs.contains(username) ? 1 : 0;
        // StringBuilder = comme concaténer des String mais BEAUCOUP plus rapide quand tu fais plein de .append()
        // (concaténer avec + dans une boucle recrée un nouveau String à chaque fois = lag)
        StringBuilder goalStr = new StringBuilder();
        for (int i = 0; i < ud.goals.size(); i++) {
          if (i > 0) goalStr.append(";"); // ; entre chaque objectif dans le même champ du fichier
-         Goal g = ud.goals.get(i);
+         Objectif g = ud.goals.get(i);
          goalStr.append(g.name).append(":").append(g.totalAmount).append(":").append(g.monthlySavings);
        }
-       pw.println(username + DELIMITER + pass + DELIMITER + isAdmin + DELIMITER +
-         ud.displayName + DELIMITER + ud.age + DELIMITER + ud.investPercent + DELIMITER + ud.occupation +
-         (goalStr.length() > 0 ? DELIMITER + goalStr.toString() : ""));
+       pw.println(username + DELIMITEUR + pass + DELIMITEUR + isAdmin + DELIMITEUR +
+         ud.displayName + DELIMITEUR + ud.age + DELIMITEUR + ud.investPercent + DELIMITEUR + ud.occupation +
+         (goalStr.length() > 0 ? DELIMITEUR + goalStr.toString() : ""));
      }
    } catch (IOException e) {
      e.printStackTrace();
    }
  }
  // Supprime tous les utilisateurs sauf les administrateurs.
- public static void wipeAllUserData() {
-   // TRICK: tu peux PAS enlever des trucs d'un HashMap pendant que tu fais for (x : users.keySet())
+ public static void effacerDonneesUtilisateurs() {
+   // TRICK: tu peux PAS enlever des trucs d'un HashMap pendant que tu fais for (x : utilisateurs.keySet())
    // ça throw ConcurrentModificationException. Donc on met les noms à supprimer dans un HashSet temporaire d'abord.
-   Set < String > toRemove = new HashSet < > ();
-   for (String username: users.keySet()) {
-     if (!admins.contains(username)) toRemove.add(username);
+   Set < String > aSupprimer = new HashSet < > ();
+   for (String username: utilisateurs.keySet()) {
+     if (!administrateurs.contains(username)) aSupprimer.add(username);
    }
-   for (String username: toRemove) {
-     users.remove(username);
-     profiles.remove(username);
+   for (String username: aSupprimer) {
+     utilisateurs.remove(username);
+     profils.remove(username);
    }
-   saveData();
+   sauvegarderDonnees();
  }
- public static void hardReset() {
-   users.clear();
-   admins.clear(); profiles.clear();
-   initDefaults();
-   saveData();
+ public static void reinitialisationComplete() {
+   utilisateurs.clear();
+   administrateurs.clear(); profils.clear();
+   initialiserParDefaut();
+   sauvegarderDonnees();
  }
  // Vérifie si le couple utilisateur/mot de passe est correct.
- public static boolean authenticate(String username, String password) {
-   return users.containsKey(username) && users.get(username).equals(password);
+ public static boolean authentifier(String username, String password) {
+   return utilisateurs.containsKey(username) && utilisateurs.get(username).equals(password);
  }
  // Crée un nouveau compte si le nom n'est pas déjà pris.
- public static boolean register(String username, String password) {
-   if (users.containsKey(username)) return false;
-   users.put(username, password);
+ public static boolean enregistrer(String username, String password) {
+   if (utilisateurs.containsKey(username)) return false;
+   utilisateurs.put(username, password);
    // Crée un profil vide par défaut.
-   profiles.put(username, new UserData(username, 0, 50, ""));
-   saveData();
+   profils.put(username, new DonneesUtilisateur(username, 0, 50, ""));
+   sauvegarderDonnees();
    return true;
  }
- public static boolean isAdmin(String username) {
-   return admins.contains(username);
+ public static boolean estAdmin(String username) {
+   return administrateurs.contains(username);
  }
- public static UserData getUserProfile(String username) {
-   return profiles.get(username);
+ public static DonneesUtilisateur obtenirProfilUtilisateur(String username) {
+   return profils.get(username);
  }
- public static void updateUserProfile(String username, UserData data) {
-   profiles.put(username, data);
-   saveData();
+ public static void mettreAJourProfil(String username, DonneesUtilisateur data) {
+   profils.put(username, data);
+   sauvegarderDonnees();
  }
  // Retrait sécurisé d'un utilisateur de la base de données.
- public static void deleteAccount(String username) {
+ public static void supprimerCompte(String username) {
    // throw = on LANCE une exception volontairement (le cours parle surtout de catch, pas de throw)
    // IllegalArgumentException = "tu m'as donné un mauvais argument" — ici supprimer un admin est interdit
-   if (admins.contains(username))
+   if (administrateurs.contains(username))
      throw new IllegalArgumentException("Impossible de supprimer un compte administrateur.");
-   users.remove(username);
-   profiles.remove(username);
-   saveData();
+   utilisateurs.remove(username);
+   profils.remove(username);
+   sauvegarderDonnees();
  }
  // Renvoie la liste de tous les noms d'utilisateurs (admins et normaux).
- public static Set < String > getAllUsernames() {
-   return users.keySet();
+ public static Set < String > obtenirTousLesNomsUtilisateurs() {
+   return utilisateurs.keySet();
  }
  // Renvoie uniquement les noms des utilisateurs normaux (utilisé par l'admin).
- public static Set < String > getNonAdminUsernames() {
-   // new HashSet<>(users.keySet()) = copie toutes les clés dans un nouveau HashSet qu'on peut modifier
-   Set < String > nonAdmins = new HashSet < > (users.keySet());
-   nonAdmins.removeAll(admins); // removeAll = enlève tout ce qui est aussi dans admins (garde que les users normaux)
+ public static Set < String > obtenirNomsNonAdmin() {
+   // new HashSet<>(utilisateurs.keySet()) = copie toutes les clés dans un nouveau HashSet qu'on peut modifier
+   Set < String > nonAdmins = new HashSet < > (utilisateurs.keySet());
+   nonAdmins.removeAll(administrateurs); // removeAll = enlève tout ce qui est aussi dans administrateurs (garde que les users normaux)
    return nonAdmins;
  }
 }
 // Stocke les informations personnelles. investPercent définit le ratio Investissement / Épargne.
-class UserData {
+class DonneesUtilisateur {
  String displayName;
  int age;
  int investPercent; // Ratio : % pour investir vs % pour épargner.
  String occupation;
- ArrayList < Goal > goals = new ArrayList < > ();
- public UserData(String displayName, int age, int investPercent, String occupation) {
+ ArrayList < Objectif > goals = new ArrayList < > ();
+ public DonneesUtilisateur(String displayName, int age, int investPercent, String occupation) {
    // "this" permet de différencier les variables de la classe des paramètres reçus.
    this.displayName = displayName;
    this.age = age;
@@ -262,17 +262,17 @@ class UserData {
  }
 }
 // Représente un but d'épargne (nom, montant total et montant mensuel).
-class Goal {
+class Objectif {
  String name;
  double totalAmount;
  double monthlySavings;
- public Goal(String name, double totalAmount, double monthlySavings) {
+ public Objectif(String name, double totalAmount, double monthlySavings) {
    this.name = name;
    this.totalAmount = totalAmount;
    this.monthlySavings = monthlySavings;
  }
  // Combien de mois pour atteindre le montant si tu épargnes X par mois
- public int getMonthsNeeded() {
+ public int getMoisNecessaires() {
    if (monthlySavings <= 0) return Integer.MAX_VALUE; // MAX_VALUE = plus gros int possible, on l'utilise comme "infini"
    // Math.ceil = arrondi vers le HAUT (cours a floor et random, pas ceil). Ex: 10.1 mois -> 11 mois.
    // (int) devant = cast: coupe les décimales après le ceil
@@ -280,7 +280,7 @@ class Goal {
  }
 }
 // MainFrame = JFrame principal (fenêtre) — le cours montre JFrame + JPanel, nous on empile des "pages"
-class MainFrame extends JFrame {
+class FenetrePrincipale extends JFrame {
  // CardLayout = layout manager PAS au cours: imagine un paquet de cartes, une seule visible à la fois.
  // layout.show(panel, "ACCUEIL") = flip vers la carte nommée "ACCUEIL"
  CardLayout layout;
@@ -292,7 +292,7 @@ class MainFrame extends JFrame {
  double montantOutil = 0;
  boolean isLoggedIn = false;
  String loggedInUsername = null;
-  public MainFrame() {
+  public FenetrePrincipale() {
    setTitle("FinanSavant");
    setSize(900, 500);
    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -303,15 +303,15 @@ class MainFrame extends JFrame {
    mainPanel.setBackground(Theme.BG);
   
    // Création des différentes pages.
-   accueilPanel = new PageAccueil(this);
-   profilPanel = new PageProfil(this);
-   adminPanel = new PageAdmin(this);
-   objectifPanel = new PageObjectif(this);
-   mainPanel.add(accueilPanel, "ACCUEIL");
-   mainPanel.add(profilPanel, "PROFIL");
-   mainPanel.add(objectifPanel, "OBJECTIF");
-   mainPanel.add(new PageInvest(this), "INVEST");
-   mainPanel.add(new PageEpargne(this), "EPARGNE");
+  accueilPanel = new PageAccueil(this);
+  profilPanel = new PageProfil(this);
+  adminPanel = new PageAdmin(this);
+  objectifPanel = new PageObjectif(this);
+  mainPanel.add(accueilPanel, "ACCUEIL");
+  mainPanel.add(profilPanel, "PROFIL");
+  mainPanel.add(objectifPanel, "OBJECTIF");
+  mainPanel.add(new PageInvestissement(this), "INVEST");
+  mainPanel.add(new PageEpargne(this), "EPARGNE");
    mainPanel.add(adminPanel, "ADMIN");
    add(mainPanel);
    setVisible(true);
@@ -353,14 +353,14 @@ class MainFrame extends JFrame {
  }
 }
 // Premier écran contenant les accès aux différents outils (Objectifs, Investissement, Épargne).
-class PageAccueil extends JPanel {
+ class PageAccueil extends JPanel {
  JLabel header;
  JLabel notLoggedMessage;
  JButton objectifBtn, investBtn, epargneBtn;
  JButton profilBtn;
  JButton deconnexionBtn;
  JButton adminBtn;
- public PageAccueil(MainFrame frame) {
+  public PageAccueil(FenetrePrincipale frame) {
    setBackground(Theme.BG);
    // GridBagLayout = le layout le plus flexible (pas au cours). Chaque widget a des "contraintes" (gbc).
    // gridx/gridy = case dans la grille, weightx/weighty = qui prend l'espace en extra, anchor = où coller le widget
@@ -369,7 +369,7 @@ class PageAccueil extends JPanel {
    gbc.insets = new Insets(15, 15, 15, 15); // Insets = marge haut/gauche/bas/droite autour du composant
   
    profilBtn = new JButton("Profil");
-   profilBtn.addActionListener(e -> frame.retourProfil()); // lambda: au clic, va page profil (pas besoin de ActionListener class)
+  profilBtn.addActionListener(e -> frame.retourProfil()); // lambda: au clic, va page profil (pas besoin de ActionListener class)
   
    gbc.gridx = 0; // Placement dans la grille (colonne 0, ligne 0).
    gbc.gridy = 0;
@@ -473,7 +473,7 @@ class PageAccueil extends JPanel {
    objectifBtn.setEnabled(loggedIn);
    investBtn.setEnabled(loggedIn);
    epargneBtn.setEnabled(loggedIn);
-   if (loggedIn && AuthManager.isAdmin(username)) {
+  if (loggedIn && GestionAuth.estAdmin(username)) {
      header.setText("FinanSavant Admin");
    } else {
      header.setText("FinanSavant");
@@ -481,11 +481,11 @@ class PageAccueil extends JPanel {
    notLoggedMessage.setVisible(!loggedIn);
    profilBtn.setText(loggedIn ? username : "Profil"); // ternaire: si connecté affiche le username sur le bouton
    deconnexionBtn.setVisible(loggedIn);
-   adminBtn.setVisible(loggedIn && AuthManager.isAdmin(username));
+  adminBtn.setVisible(loggedIn && GestionAuth.estAdmin(username));
  }
 }
 // Gère l'identification et la modification des données du profil (Age, Répartition invest/épargne).
-class PageProfil extends JPanel {
+ class PageProfil extends JPanel {
  // Composants LOGIN
  JTextField champUser = new JTextField(15);
  // JPasswordField = comme JTextField mais cache les caractères (****). getPassword() retourne char[] pas String
@@ -519,7 +519,7 @@ class PageProfil extends JPanel {
   JPanel loginCard = new JPanel(new GridBagLayout());
  JPanel profileCard = new JPanel(new GridBagLayout());
  private String currentUser = null;
-  public PageProfil(MainFrame frame) {
+  public PageProfil(FenetrePrincipale frame) {
    setBackground(Theme.BG);
    // BorderLayout = divise en NORTH/SOUTH/EAST/WEST/CENTER (pas au cours, on l'utilise partout ici)
    setLayout(new BorderLayout());
@@ -624,14 +624,14 @@ class PageProfil extends JPanel {
    cards.add(profileCard, "PROFILE");
    add(cards, BorderLayout.CENTER);
    // --- Événements ---
-   btnConnexion.addActionListener(e -> { // Action lors du clic sur Connexion.
+  btnConnexion.addActionListener(e -> { // Action lors du clic sur Connexion.
      String user = champUser.getText().trim(); // trim() = enlève espaces au début/fin (évite " kenji " qui marche pas)
      String pass = new String(champPass.getPassword()); // char[] -> String parce que le reste du code compare des String
      if (user.isEmpty() || pass.isEmpty()) {
        messageLogin.setText("Veuillez remplir tous les champs.");
        return;
      }
-     if (AuthManager.authenticate(user, pass)) {
+     if (GestionAuth.authentifier(user, pass)) {
        frame.setLoggedIn(true, user);
        messageLogin.setText("Connexion réussie !");
        currentUser = user;
@@ -649,7 +649,7 @@ class PageProfil extends JPanel {
        messageLogin.setText("Veuillez remplir tous les champs.");
        return;
      }
-     if (AuthManager.register(user, pass)) {
+     if (GestionAuth.enregistrer(user, pass)) {
        frame.setLoggedIn(true, user);
        messageLogin.setText("Compte créé et connecté !");
        currentUser = user;
@@ -680,10 +680,10 @@ class PageProfil extends JPanel {
      }
      int investPercent = sliderRepartition.getValue();
      String occupation = (String) champOccupation.getSelectedItem();
-     UserData oldData = AuthManager.getUserProfile(currentUser);
-     UserData newData = new UserData(nom, Integer.parseInt(ageStr), investPercent, occupation);
+     DonneesUtilisateur oldData = GestionAuth.obtenirProfilUtilisateur(currentUser);
+     DonneesUtilisateur newData = new DonneesUtilisateur(nom, Integer.parseInt(ageStr), investPercent, occupation);
      if (oldData != null) newData.goals = oldData.goals;
-     AuthManager.updateUserProfile(currentUser, newData);
+     GestionAuth.mettreAJourProfil(currentUser, newData);
      messageErreur.setText("Profil sauvegardé : " + nom + ", " + ageStr + " ans, " +
        investPercent + "% invest / " + (100 - investPercent) + "% épargne, " + occupation);
    });
@@ -695,8 +695,8 @@ class PageProfil extends JPanel {
    labelSliderDisplay.setText("Investissement : " + invest + "% | Épargne : " + epargne + "%");
  }
  // Remplit les champs du formulaire avec les données déjà sauvegardées de l'utilisateur.
- private void populateProfile() {
-   UserData data = AuthManager.getUserProfile(currentUser);
+   private void populateProfile() {
+   DonneesUtilisateur data = GestionAuth.obtenirProfilUtilisateur(currentUser);
    if (data != null) {
      champNom.setText(data.displayName);
      champAge.setText(String.valueOf(data.age));
@@ -704,7 +704,7 @@ class PageProfil extends JPanel {
      updateSliderLabel();
      champOccupation.setSelectedItem(data.occupation);
    }
-   champNom.setEditable(AuthManager.isAdmin(currentUser));
+  champNom.setEditable(GestionAuth.estAdmin(currentUser));
  }
  // Vide les champs quand on se déconnecte.
  public void resetToLogin() {
@@ -724,10 +724,10 @@ class PageProfil extends JPanel {
 }
 // Permet de lister, d'ajouter ou de modifier ses projets financiers personnels.
 class PageObjectif extends JPanel {
- private MainFrame frame;
+ private FenetrePrincipale frame;
  private JPanel gridPanel;
  private JButton addButton;
- public PageObjectif(MainFrame frame) {
+  public PageObjectif(FenetrePrincipale frame) {
    this.frame = frame;
    setBackground(Theme.BG);
    setLayout(new BorderLayout());
@@ -745,7 +745,7 @@ class PageObjectif extends JPanel {
  }
  public void refreshGoals() {
    gridPanel.removeAll(); // enlève tous les boutons vieux avant de redessiner
-   String username = frame.loggedInUsername;
+  String username = frame.loggedInUsername;
    if (username == null) {
      gridPanel.setLayout(new FlowLayout());
      gridPanel.add(new JLabel("Connectez-vous pour voir vos objectifs."));
@@ -754,7 +754,7 @@ class PageObjectif extends JPanel {
      gridPanel.repaint();
      return;
    }
-   UserData data = AuthManager.getUserProfile(username);
+  DonneesUtilisateur data = GestionAuth.obtenirProfilUtilisateur(username);
    if (data == null) {
      gridPanel.setLayout(new FlowLayout());
      gridPanel.add(new JLabel("Profil introuvable."));
@@ -762,7 +762,7 @@ class PageObjectif extends JPanel {
      gridPanel.repaint();
      return;
    }
-   ArrayList < Goal > goals = data.goals;
+  ArrayList < Objectif > goals = data.goals;
    if (goals.isEmpty()) {
      gridPanel.setLayout(new GridBagLayout());
      addButton = createAddButton();
@@ -772,7 +772,7 @@ class PageObjectif extends JPanel {
      int cols = 3;
      int rows = (int) Math.ceil((goals.size() + 1) / (double) cols); // +1 pour le bouton "+" d'ajout
      gridPanel.setLayout(new GridLayout(rows, cols, 10, 10));
-     for (Goal g: goals) gridPanel.add(createGoalButton(g));
+    for (Objectif g: goals) gridPanel.add(createGoalButton(g));
      addButton = createAddButton();
      gridPanel.add(addButton);
    }
@@ -786,8 +786,8 @@ class PageObjectif extends JPanel {
    return btn;
  }
  // Crée un bouton visuel pour un objectif existant.
- private JButton createGoalButton(Goal goal) {
-   int months = goal.getMonthsNeeded();
+ private JButton createGoalButton(Objectif goal) {
+   int months = goal.getMoisNecessaires();
    String timeText = (months == Integer.MAX_VALUE) ? "∞ mois" : months + " mois";
    // HTML dans un JLabel/JButton = trick Swing: <br> pour saut de ligne, <center> pour centrer (pas du vrai HTML web)
    String text = "<html><center>" + goal.name + "<br>" +
@@ -799,7 +799,7 @@ class PageObjectif extends JPanel {
    return btn;
  }
  // Fenêtre contextuelle pour ajouter ou modifier un objectif.
- private void showGoalDialog(Goal existingGoal) {
+ private void showGoalDialog(Objectif existingGoal) {
    boolean isNew = (existingGoal == null);
    JTextField nameField = new JTextField(isNew ? "" : existingGoal.name, 20);
    JTextField totalField = new JTextField(isNew ? "" : String.valueOf(existingGoal.totalAmount), 10);
@@ -829,15 +829,15 @@ class PageObjectif extends JPanel {
      JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
    if (result < 0) return;
   
-   if (!isNew && result == 1) {
+  if (!isNew && result == 1) {
      int confirm = JOptionPane.showConfirmDialog(this,
        "Voulez-vous vraiment supprimer l'objectif \"" + existingGoal.name + "\" ?",
        "Confirmation", JOptionPane.YES_NO_OPTION);
      if (confirm == JOptionPane.YES_OPTION) {
-       UserData data = AuthManager.getUserProfile(frame.loggedInUsername);
+      DonneesUtilisateur data = GestionAuth.obtenirProfilUtilisateur(frame.loggedInUsername);
        if (data != null) {
          data.goals.remove(existingGoal);
-         AuthManager.saveData();
+         GestionAuth.sauvegarderDonnees();
          refreshGoals();
        }
      }
@@ -864,21 +864,21 @@ class PageObjectif extends JPanel {
        JOptionPane.ERROR_MESSAGE);
      return;
    }
-   UserData data = AuthManager.getUserProfile(frame.loggedInUsername);
+   DonneesUtilisateur data = GestionAuth.obtenirProfilUtilisateur(frame.loggedInUsername);
    if (data != null) {
-     if (isNew) data.goals.add(new Goal(name, totalAmount, monthlySavings));
+     if (isNew) data.goals.add(new Objectif(name, totalAmount, monthlySavings));
      else {
        existingGoal.name = name;
        existingGoal.totalAmount = totalAmount;
        existingGoal.monthlySavings = monthlySavings;
      }
-     AuthManager.saveData();
+     GestionAuth.sauvegarderDonnees();
      refreshGoals();
    }
  }
 }
 // Propose des conseils d'investissement et simule la croissance du capital sur 1, 3 et 5 ans.
-class PageInvest extends JPanel {
+class PageInvestissement extends JPanel {
  JComboBox < String > risqueBox;
  // JCheckBox = case à cocher (checkbox) — isSelected() dit si c'est coché ou pas
  JCheckBox actionsBox;
@@ -937,7 +937,7 @@ class PageInvest extends JPanel {
      "• Liquide, contrairement à l'immobilier physique<br><br>" +
      "Risque : Moyen</html>");
  }
- public PageInvest(MainFrame frame) {
+ public PageInvestissement(FenetrePrincipale frame) {
    // Mise en page de la fenêtre d'investissement.
    setBackground(Theme.BG);
    setLayout(new BorderLayout());
@@ -1050,7 +1050,7 @@ class PageInvest extends JPanel {
    });
   
    // Mise à jour de l'aperçu du conseiller dès qu'une case est cochée ou changée.
-   risqueBox.addActionListener(e -> refreshAdvisorPreview(frame));
+  risqueBox.addActionListener(e -> refreshAdvisorPreview(frame));
    actionsBox.addActionListener(e -> refreshAdvisorPreview(frame));
    etfBox.addActionListener(e -> refreshAdvisorPreview(frame));
    cryptoBox.addActionListener(e -> refreshAdvisorPreview(frame));
@@ -1064,7 +1064,7 @@ class PageInvest extends JPanel {
        JOptionPane.showMessageDialog(this, "Le montant doit être positif.");
        return;
      }
-     UserData user = AuthManager.getUserProfile(frame.loggedInUsername);
+     DonneesUtilisateur user = GestionAuth.obtenirProfilUtilisateur(frame.loggedInUsername);
      if (user == null) {
        JOptionPane.showMessageDialog(this, "Profil introuvable.");
        return;
@@ -1089,7 +1089,7 @@ class PageInvest extends JPanel {
        JOptionPane.showMessageDialog(this, "Le montant doit être positif.");
        return;
      }
-     UserData user = AuthManager.getUserProfile(frame.loggedInUsername);
+     DonneesUtilisateur user = GestionAuth.obtenirProfilUtilisateur(frame.loggedInUsername);
      if (user == null) {
        JOptionPane.showMessageDialog(this, "Profil introuvable.");
        return;
@@ -1111,7 +1111,7 @@ class PageInvest extends JPanel {
    });
  }
  // Crée une case à cocher qui affiche une description détaillée du type d'investissement avant sélection.
- private JCheckBox makeConfirmCheckBox(String label, MainFrame frame) {
+ private JCheckBox makeConfirmCheckBox(String label, FenetrePrincipale frame) {
    JCheckBox box = new JCheckBox(label);
    box.setOpaque(false);
    attachConfirmListener(box, label);
@@ -1345,8 +1345,8 @@ class PageInvest extends JPanel {
    return risque.startsWith("Faible") ? 0 : risque.startsWith("Moyen") ? 1 : 2; // ternaire chaîné
  }
  // Met à jour la boîte texte du conseiller en temps réel.
- private void refreshAdvisorPreview(MainFrame frame) {
-   UserData user = AuthManager.getUserProfile(frame.loggedInUsername);
+ private void refreshAdvisorPreview(FenetrePrincipale frame) {
+   DonneesUtilisateur user = GestionAuth.obtenirProfilUtilisateur(frame.loggedInUsername);
    if (user == null) return;
    int riskLevel = getRiskLevel();
    boolean anySelected = actionsBox.isSelected() || etfBox.isSelected() ||
@@ -1357,7 +1357,7 @@ class PageInvest extends JPanel {
    advisorArea.setText(getAdvisorSummary(user, riskLevel, frame.montantOutil, anySelected));
  }
  // Génère un résumé textuel basé sur les données de l'utilisateur.
- private String getAdvisorSummary(UserData user, int riskLevel, double montant, boolean anySelected) {
+ private String getAdvisorSummary(DonneesUtilisateur user, int riskLevel, double montant, boolean anySelected) {
    StringBuilder sb = new StringBuilder();
    sb.append("Bonjour " + user.displayName + ", voici votre analyse personnelle :\n\n");
    sb.append("Profil : âge " + user.age + " ans, occupation " + user.occupation + ", ");
@@ -1427,7 +1427,7 @@ class PageInvest extends JPanel {
    scroll.setPreferredSize(new Dimension(width, height));
    JOptionPane.showMessageDialog(this, scroll, title, JOptionPane.PLAIN_MESSAGE);
  }
- private String buildPlan(double montant, UserData user, int risqueLevel) {
+ private String buildPlan(double montant, DonneesUtilisateur user, int risqueLevel) {
    int investPercent = user.investPercent;
    double montantInvesti = montant * investPercent / 100.0;
    double montantEpargne = montant - montantInvesti;
@@ -1457,7 +1457,7 @@ class PageInvest extends JPanel {
    sb.append("=================================================\n");
    return sb.toString();
  }
- private String buildSimulationReport(double montant, UserData user, int risqueLevel,
+ private String buildSimulationReport(double montant, DonneesUtilisateur user, int risqueLevel,
    boolean actionsSel, boolean etfSel, boolean cryptoSel,
    boolean obligationsSel, boolean commoditesSel, boolean reitsSel) {
    StringBuilder sb = new StringBuilder();
@@ -1547,9 +1547,9 @@ class PageEpargne extends JPanel {
  private JTextArea zonePlanDetaille;
  private final Color COULEUR_SURBRILLANCE = new Color(50, 200, 50);
  private final Color COULEUR_BOUTON_NORMAL = new Color(240, 240, 240); // Gris clair par défaut.
- private MainFrame fenetrePrincipale;
- private String compteRecommande = null;
- public PageEpargne(MainFrame frame) {
+  private FenetrePrincipale fenetrePrincipale;
+  private String compteRecommande = null;
+  public PageEpargne(FenetrePrincipale frame) {
    this.fenetrePrincipale = frame;
    setLayout(new BorderLayout());
    JPanel panneauHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -1718,7 +1718,7 @@ class PageEpargne extends JPanel {
    String epargneEtudes = (String) boiteEpargneEtudesEnfants.getSelectedItem();
    String objectifPrincipal = (String) boiteObjectifFinancierPrincipal.getSelectedItem();
    String nomUtilisateur = fenetrePrincipale.loggedInUsername;
-   UserData donneesUtilisateur = AuthManager.getUserProfile(nomUtilisateur);
+  DonneesUtilisateur donneesUtilisateur = GestionAuth.obtenirProfilUtilisateur(nomUtilisateur);
    int ageUtilisateur = (donneesUtilisateur != null) ? donneesUtilisateur.age : 30;
    String occupationUtilisateur = (donneesUtilisateur != null) ? donneesUtilisateur.occupation : "Temps plein";
    String compteRecommandeTemp = null;
@@ -1753,12 +1753,12 @@ class PageEpargne extends JPanel {
      zonePlanDetaille.setText("Veuillez vous connecter pour générer un plan d'épargne.");
      return;
    }
-   UserData donneesUtilisateur = AuthManager.getUserProfile(nomUtilisateur);
+  DonneesUtilisateur donneesUtilisateur = GestionAuth.obtenirProfilUtilisateur(nomUtilisateur);
    if (donneesUtilisateur == null) {
      zonePlanDetaille.setText("Profil utilisateur introuvable.");
      return;
    }
-   ArrayList < Goal > listeObjectifs = donneesUtilisateur.goals;
+  ArrayList < Objectif > listeObjectifs = donneesUtilisateur.goals;
    String objectifPrincipal = (String) boiteObjectifFinancierPrincipal.getSelectedItem();
    StringBuilder plan = new StringBuilder();
    plan.append("========== PLAN D'EPARGNE PERSONNALISE ==========\n\n");
@@ -1771,8 +1771,8 @@ class PageEpargne extends JPanel {
   
    if (!listeObjectifs.isEmpty()) {
      plan.append("VOS OBJECTIFS\n");
-     for (Goal objectif: listeObjectifs) {
-       int moisRequis = objectif.getMonthsNeeded();
+     for (Objectif objectif: listeObjectifs) {
+       int moisRequis = objectif.getMoisNecessaires();
        int anneesRequis = moisRequis / 12;
        int moisRestants = moisRequis % 12; // % = modulo (reste de la division) — ex: 14 mois = 1 an et 2 mois
        String temps = "";
@@ -1816,9 +1816,9 @@ class PageEpargne extends JPanel {
 class PageAdmin extends JPanel {
  private DefaultListModel < String > userListModel;
  private JList < String > userList;
- private MainFrame frame;
+ private FenetrePrincipale frame;
  private JButton barbieriResetBtn;
- public PageAdmin(MainFrame frame) {
+ public PageAdmin(FenetrePrincipale frame) {
    this.frame = frame;
    setBackground(Theme.BG);
    setLayout(new BorderLayout());
@@ -1844,7 +1844,7 @@ class PageAdmin extends JPanel {
        // split(" \\(") = coupe la string au premier " (" pour avoir juste le username (avant les infos entre parenthèses)
        String username = selected.split(" \\(")[0];
        // Sécurité pour éviter que l'admin ne se supprime lui-même.
-       if (AuthManager.isAdmin(username)) {
+      if (GestionAuth.estAdmin(username)) {
          JOptionPane.showMessageDialog(this, "Impossible de supprimer un administrateur.", "Erreur",
            JOptionPane.ERROR_MESSAGE);
          return;
@@ -1854,7 +1854,7 @@ class PageAdmin extends JPanel {
          "Confirmation", JOptionPane.YES_NO_OPTION);
        if (confirm == JOptionPane.YES_OPTION) {
          try {
-           AuthManager.deleteAccount(username);
+           GestionAuth.supprimerCompte(username);
            if (username.equals(frame.loggedInUsername)) frame.logout();
            refreshUserList();
          } catch (IllegalArgumentException ex) {
@@ -1874,8 +1874,8 @@ class PageAdmin extends JPanel {
        "Êtes-vous absolument certain de vouloir supprimer TOUS les comptes non-administrateurs ?\nCette action est irréversible.",
        "Réinitialisation totale", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
      if (confirm == JOptionPane.YES_OPTION) {
-       AuthManager.wipeAllUserData();
-       if (frame.loggedInUsername != null && !AuthManager.getAllUsernames().contains(frame.loggedInUsername))
+      GestionAuth.effacerDonneesUtilisateurs();
+      if (frame.loggedInUsername != null && !GestionAuth.obtenirTousLesNomsUtilisateurs().contains(frame.loggedInUsername))
          frame.logout();
        refreshUserList();
        JOptionPane.showMessageDialog(this, "Tous les comptes non-administrateurs ont été supprimés.");
@@ -1891,7 +1891,7 @@ class PageAdmin extends JPanel {
        "Cette action est irréversible.",
        "Hard Reset", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
      if (confirm == JOptionPane.YES_OPTION) {
-       AuthManager.hardReset();
+      GestionAuth.reinitialisationComplete();
        frame.logout();
        JOptionPane.showMessageDialog(null, "Le système a été réinitialisé à son état d'usine.");
      }
@@ -1909,8 +1909,8 @@ class PageAdmin extends JPanel {
      barbieriResetBtn.setVisible(frame.loggedInUsername.equals("barbieri"));
    }
    userListModel.clear();
-   for (String u: AuthManager.getNonAdminUsernames()) {
-     UserData data = AuthManager.getUserProfile(u);
+   for (String u: GestionAuth.obtenirNomsNonAdmin()) {
+     DonneesUtilisateur data = GestionAuth.obtenirProfilUtilisateur(u);
      String entry = u;
      if (data != null) {
        entry += " (" + data.displayName + ", " + data.age + " ans, " +
