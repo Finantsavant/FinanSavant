@@ -8,22 +8,35 @@ class PageObjectif extends JPanel {
   private final FenetrePrincipale fenetre;
   private JPanel panneauGrille;
   private JButton boutonAjouter;
+  private JLabel titrePage;
 
   public PageObjectif(FenetrePrincipale fenetre) {
-    this.fenetre = fenetre;
-    setBackground(Apparence.FOND);
-    setLayout(new BorderLayout());
-    setBorder(new EmptyBorder(10, 10, 10, 10));
-    JPanel barreHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    barreHaut.setOpaque(false);
-    JButton boutonRetour = new JButton("< Retour");
-    boutonRetour.addActionListener(e -> fenetre.retourAccueil());
-    barreHaut.add(boutonRetour);
-    add(barreHaut, BorderLayout.NORTH);
-    panneauGrille = new JPanel();
-    panneauGrille.setBackground(Apparence.FOND);
-    add(new JScrollPane(panneauGrille), BorderLayout.CENTER);
-  }
+	  this.fenetre = fenetre;
+	  setBackground(Apparence.FOND);
+	  setLayout(new BorderLayout());
+	  setBorder(new EmptyBorder(10, 10, 10, 10));
+
+	  // ===== PANNEAU DU HAUT comme les autres pages =====
+	  JPanel barreHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	  barreHaut.setOpaque(false);
+
+	  // Bouton retour
+	  JButton boutonRetour = new JButton("< Retour");
+	  boutonRetour.addActionListener(e -> fenetre.retourAccueil());
+	  barreHaut.add(boutonRetour);
+
+	  // Titre "Objectifs" juste à côté du bouton (pas centré)
+	  titrePage = new JLabel("Objectifs");
+	  titrePage.setFont(Apparence.SOUS_TITRE);
+	  titrePage.setForeground(Apparence.PRINCIPALE);
+	  barreHaut.add(titrePage);
+
+	  add(barreHaut, BorderLayout.NORTH);
+
+	  panneauGrille = new JPanel();
+	  panneauGrille.setBackground(Apparence.FOND);
+	  add(new JScrollPane(panneauGrille), BorderLayout.CENTER);
+	}
 
   public void actualiserObjectifs() {
     panneauGrille.removeAll();
@@ -68,16 +81,28 @@ class PageObjectif extends JPanel {
   }
 
   private JButton creerBoutonObjectif(Objectif objectif) {
-    int mois = objectif.obtenirMoisNecessaires();
-    String texteTemps = (mois == Integer.MAX_VALUE) ? "∞ mois" : mois + " mois";
-    String texte = "<html><center>" + objectif.nom + "<br>"
-      + "Total : " + String.format("%.2f", objectif.montantTotal) + " $"
-      + "<br>Estimé : " + texteTemps + "</center></html>";
-    JButton bouton = new JButton(texte);
-    bouton.setFont(new Font("Arial", Font.PLAIN, 12));
-    bouton.addActionListener(e -> afficherDialogueObjectif(objectif));
-    return bouton;
-  }
+	  int mois = objectif.obtenirMoisNecessaires();
+	  String texteTemps = (mois == Integer.MAX_VALUE) ? "∞ mois" : mois + " mois";
+
+	  // Met la première lettre du nom en majuscule
+	  String nomObjectif = objectif.nom;
+	  if (nomObjectif != null && nomObjectif.length() > 0) {
+	    char premiereLettre = nomObjectif.charAt(0);
+	    if (!Character.isUpperCase(premiereLettre)) {
+	      nomObjectif = Character.toUpperCase(premiereLettre) + nomObjectif.substring(1);
+	    }
+	  }
+
+	  // <b> = gras en HTML
+	  String texte = "<html><center><b>" + nomObjectif + "</b><br>"
+	    + "Total : " + String.format("%.2f", objectif.montantTotal) + " $"
+	    + "<br>Estimé : " + texteTemps + "</center></html>";
+
+	  JButton bouton = new JButton(texte);
+	  bouton.setFont(new Font("Arial", Font.PLAIN, 12));
+	  bouton.addActionListener(e -> afficherDialogueObjectif(objectif));
+	  return bouton;
+	}
 
   private void afficherDialogueObjectif(Objectif objectifExistant) {
     boolean estNouveau = (objectifExistant == null);
@@ -119,6 +144,15 @@ class PageObjectif extends JPanel {
     }
 
     String nom = champNomObjectif.getText().trim();
+    
+    // Met la première lettre en majuscule (optionnel)
+    if (nom.length() > 0) {
+      char premiereLettre = nom.charAt(0);
+      if (!Character.isUpperCase(premiereLettre)) {
+        nom = Character.toUpperCase(premiereLettre) + nom.substring(1);
+      }
+    }
+    
     String totalTexte = champMontantTotal.getText().trim();
     String epargneTexte = champEpargneMensuelle.getText().trim();
     if (nom.isEmpty() || totalTexte.isEmpty() || epargneTexte.isEmpty()) {
