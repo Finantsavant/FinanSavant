@@ -25,6 +25,7 @@ class PageEpargne extends JPanel {
     panneauHaut.add(boutonRetour);
     JLabel titrePage = new JLabel("Plan d'épargne personnalisé");
     titrePage.setFont(Apparence.SOUS_TITRE);
+    titrePage.setForeground(Apparence.PRINCIPALE);
     panneauHaut.add(titrePage);
     add(panneauHaut, BorderLayout.NORTH);
 
