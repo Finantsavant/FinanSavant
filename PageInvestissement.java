@@ -13,7 +13,7 @@ class PageInvestissement extends JPanel {
   // cases à cocher pour les différentes classes d'actifs
   // une "classe d'actif" c'est juste un type d'investissement
   JCheckBox caseActions;
-  JCheckBox caseFnb;        // fonds négociés en bourse (comme ETF en anglais)
+  JCheckBox caseEtf;        // fonds négociés en bourse (comme ETF en anglais)
   JCheckBox caseCrypto;
   JCheckBox caseObligations;
   JCheckBox caseMatieresPremieres;
@@ -70,14 +70,14 @@ class PageInvestissement extends JPanel {
 
     // creerCaseConfirmation ajoute automatiquement la boîte de confirmation
     caseActions = creerCaseConfirmation("Actions");
-    caseFnb = creerCaseConfirmation("FNB");
+    caseEtf = creerCaseConfirmation("ETF");
     caseCrypto = creerCaseConfirmation("Cryptomonnaies");
     caseObligations = creerCaseConfirmation("Obligations");
     caseMatieresPremieres = creerCaseConfirmation("Matières premières");
     caseImmobilierCote = creerCaseConfirmation("Immobilier coté");
 
     panneauTypes.add(caseActions);
-    panneauTypes.add(caseFnb);
+    panneauTypes.add(caseEtf);
     panneauTypes.add(caseCrypto);
     panneauTypes.add(caseObligations);
     panneauTypes.add(caseMatieresPremieres);
@@ -132,7 +132,7 @@ class PageInvestissement extends JPanel {
       }
 
       // il faut au moins une case cochée sinon le plan n'a aucun sens
-      boolean auMoinsUnSelectionne = caseActions.isSelected() || caseFnb.isSelected()
+      boolean auMoinsUnSelectionne = caseActions.isSelected() || caseEtf.isSelected()
         || caseCrypto.isSelected() || caseObligations.isSelected()
         || caseMatieresPremieres.isSelected() || caseImmobilierCote.isSelected();
 
@@ -146,7 +146,7 @@ class PageInvestissement extends JPanel {
 
       // génère le texte du plan selon tous les paramètres choisis
       String plan = GenerateurRapportInvestissement.construirePlan(montant, utilisateur, niveauRisque,
-        caseActions.isSelected(), caseFnb.isSelected(), caseCrypto.isSelected(),
+        caseActions.isSelected(), caseEtf.isSelected(), caseCrypto.isSelected(),
         caseObligations.isSelected(), caseMatieresPremieres.isSelected(), caseImmobilierCote.isSelected());
 
       // affiche le plan dans une fenêtre pop-up avec défilement
@@ -190,7 +190,7 @@ class PageInvestissement extends JPanel {
   // réinitialise toutes les cases et le menu risque quand on revient sur la page
   private void reinitialiserPage() {
     for (JCheckBox caseCocher : new JCheckBox[] {
-        caseActions, caseFnb, caseCrypto, caseObligations, caseMatieresPremieres, caseImmobilierCote
+        caseActions, caseEtf, caseCrypto, caseObligations, caseMatieresPremieres, caseImmobilierCote
       }) {
       if (caseCocher == null) continue;
 
@@ -205,7 +205,7 @@ class PageInvestissement extends JPanel {
 
     // on réattache UN seul écouteur par case
     attacherEcouteurConfirmation(caseActions, "Actions");
-    attacherEcouteurConfirmation(caseFnb, "FNB");
+    attacherEcouteurConfirmation(caseEtf, "ETF");
     attacherEcouteurConfirmation(caseCrypto, "Cryptomonnaies");
     attacherEcouteurConfirmation(caseObligations, "Obligations");
     attacherEcouteurConfirmation(caseMatieresPremieres, "Matières premières");
