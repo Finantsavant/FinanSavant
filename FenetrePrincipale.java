@@ -5,6 +5,8 @@ import java.awt.*;
 class FenetrePrincipale extends JFrame {
 
   // cardlayout permet de changer de “page” sans ouvrir plusieurs fenêtres
+  // Source: https://www.youtube.com/watch?v=ocb3x0TeoUw 
+  // https://stackoverflow.com/questions/35004701/cardlayout-for-jframes 
   CardLayout disposition;
 
   // panneau principal qui contient toutes les pages
