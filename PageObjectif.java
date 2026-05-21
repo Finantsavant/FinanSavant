@@ -11,39 +11,45 @@ class PageObjectif extends JPanel {
   private JLabel titrePage;
 
   public PageObjectif(FenetrePrincipale fenetre) {
-	  this.fenetre = fenetre;
-	  setBackground(Apparence.FOND);
-	  setLayout(new BorderLayout());
-	  setBorder(new EmptyBorder(10, 10, 10, 10));
+    this.fenetre = fenetre;
+    setBackground(Apparence.FOND);
+    setLayout(new BorderLayout());
+    setBorder(new EmptyBorder(20, 20, 20, 20));
 
-	  // ===== PANNEAU DU HAUT comme les autres pages =====
-	  JPanel barreHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
-	  barreHaut.setOpaque(false);
+    // ===== PANNEAU DU HAUT comme les autres pages =====
+    JPanel barreHaut = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    barreHaut.setOpaque(false);
 
-	  // Bouton retour
-	  JButton boutonRetour = new JButton("< Retour");
-	  boutonRetour.addActionListener(e -> fenetre.retourAccueil());
-	  barreHaut.add(boutonRetour);
+    // Bouton retour
+    JButton boutonRetour = new JButton("< Retour");
+    boutonRetour.setFont(Apparence.CORPS);
+    boutonRetour.addActionListener(e -> fenetre.retourAccueil());
+    barreHaut.add(boutonRetour);
 
-	  // Titre "Objectifs" juste à côté du bouton (pas centré)
-	  titrePage = new JLabel("Objectifs");
-	  titrePage.setFont(Apparence.SOUS_TITRE);
-	  titrePage.setForeground(Apparence.PRINCIPALE);
-	  barreHaut.add(titrePage);
+    // Titre "Objectifs" juste à côté du bouton (pas centré)
+    titrePage = new JLabel("Objectifs");
+    titrePage.setFont(Apparence.SOUS_TITRE);
+    titrePage.setForeground(Apparence.PRINCIPALE);
+    barreHaut.add(titrePage);
 
-	  add(barreHaut, BorderLayout.NORTH);
+    add(barreHaut, BorderLayout.NORTH);
 
-	  panneauGrille = new JPanel();
-	  panneauGrille.setBackground(Apparence.FOND);
-	  add(new JScrollPane(panneauGrille), BorderLayout.CENTER);
-	}
+    panneauGrille = new JPanel();
+    panneauGrille.setOpaque(false);
+    panneauGrille.setBackground(Apparence.FOND);
+    panneauGrille.setBorder(new EmptyBorder(10, 10, 10, 10));
+    add(new JScrollPane(panneauGrille), BorderLayout.CENTER);
+  }
 
   public void actualiserObjectifs() {
     panneauGrille.removeAll();
     String nomUtilisateur = fenetre.nomUtilisateurConnecte;
     if (nomUtilisateur == null) {
       panneauGrille.setLayout(new FlowLayout());
-      panneauGrille.add(new JLabel("Connectez-vous pour voir vos objectifs."));
+      JLabel messageNonConnecte = new JLabel("Connectez-vous pour voir vos objectifs.");
+      messageNonConnecte.setFont(Apparence.CORPS);
+      messageNonConnecte.setForeground(Apparence.TEXTE);
+      panneauGrille.add(messageNonConnecte);
       panneauGrille.revalidate();
       panneauGrille.repaint();
       return;
@@ -51,7 +57,10 @@ class PageObjectif extends JPanel {
     DonneesUtilisateur donnees = GestionAuth.obtenirProfilUtilisateur(nomUtilisateur);
     if (donnees == null) {
       panneauGrille.setLayout(new FlowLayout());
-      panneauGrille.add(new JLabel("Profil introuvable."));
+      JLabel messageErreur = new JLabel("Profil introuvable.");
+      messageErreur.setFont(Apparence.CORPS);
+      messageErreur.setForeground(Apparence.TEXTE);
+      panneauGrille.add(messageErreur);
       panneauGrille.revalidate();
       panneauGrille.repaint();
       return;
@@ -75,60 +84,89 @@ class PageObjectif extends JPanel {
 
   private JButton creerBoutonAjout() {
     JButton bouton = new JButton("+");
-    bouton.setFont(new Font("Arial", Font.BOLD, 30));
+    bouton.setFont(Apparence.TITRE);
+    bouton.setBackground(Apparence.SECONDAIRE);
+    bouton.setForeground(Color.WHITE);
+    bouton.setOpaque(true);
+    bouton.setBorder(BorderFactory.createLineBorder(Apparence.PRINCIPALE));
+    bouton.setPreferredSize(new Dimension(60, 60));
     bouton.addActionListener(e -> afficherDialogueObjectif(null));
     return bouton;
   }
 
   private JButton creerBoutonObjectif(Objectif objectif) {
-	  int mois = objectif.obtenirMoisNecessaires();
-	  String texteTemps = (mois == Integer.MAX_VALUE) ? "∞ mois" : mois + " mois";
+    int mois = objectif.obtenirMoisNecessaires();
+    String texteTemps = (mois == Integer.MAX_VALUE) ? "∞ mois" : mois + " mois";
 
-	  // Met la première lettre du nom en majuscule
-	  String nomObjectif = objectif.nom;
-	  if (nomObjectif != null && nomObjectif.length() > 0) {
-	    char premiereLettre = nomObjectif.charAt(0);
-	    if (!Character.isUpperCase(premiereLettre)) {
-	      nomObjectif = Character.toUpperCase(premiereLettre) + nomObjectif.substring(1);
-	    }
-	  }
+    // Met la première lettre du nom en majuscule
+    String nomObjectif = objectif.nom;
+    if (nomObjectif != null && nomObjectif.length() > 0) {
+      char premiereLettre = nomObjectif.charAt(0);
+      if (!Character.isUpperCase(premiereLettre)) {
+        nomObjectif = Character.toUpperCase(premiereLettre) + nomObjectif.substring(1);
+      }
+    }
 
-	  // <b> = gras en HTML
-	  String texte = "<html><center><b>" + nomObjectif + "</b><br>"
-	    + "Total : " + String.format("%.2f", objectif.montantTotal) + " $"
-	    + "<br>Estimé : " + texteTemps + "</center></html>";
+    // <b> = gras en HTML
+    String texte = "<html><center><b>" + nomObjectif + "</b><br>"
+      + "Total : " + String.format("%.2f", objectif.montantTotal) + " $"
+      + "<br>Estimé : " + texteTemps + "</center></html>";
 
-	  JButton bouton = new JButton(texte);
-	  bouton.setFont(new Font("Arial", Font.PLAIN, 12));
-	  bouton.addActionListener(e -> afficherDialogueObjectif(objectif));
-	  return bouton;
-	}
+    JButton bouton = new JButton(texte);
+    bouton.setFont(Apparence.CORPS);
+    bouton.setBackground(Apparence.SECONDAIRE);
+    bouton.setForeground(Color.WHITE);
+    bouton.setOpaque(true);
+    bouton.setBorder(BorderFactory.createLineBorder(Apparence.PRINCIPALE));
+    bouton.setVerticalTextPosition(SwingConstants.TOP);
+    bouton.setHorizontalTextPosition(SwingConstants.CENTER);
+    bouton.addActionListener(e -> afficherDialogueObjectif(objectif));
+    return bouton;
+  }
 
   private void afficherDialogueObjectif(Objectif objectifExistant) {
     boolean estNouveau = (objectifExistant == null);
     JTextField champNomObjectif = new JTextField(estNouveau ? "" : objectifExistant.nom, 20);
+    champNomObjectif.setFont(Apparence.CORPS);
     JTextField champMontantTotal = new JTextField(
       estNouveau ? "" : String.valueOf(objectifExistant.montantTotal), 10);
+    champMontantTotal.setFont(Apparence.CORPS);
     JTextField champEpargneMensuelle = new JTextField(
       estNouveau ? "" : String.valueOf(objectifExistant.epargneMensuelle), 10);
-    JPanel panneau = new JPanel(new GridLayout(4, 2, 5, 5));
-    panneau.add(new JLabel("Nom de l'objectif :"));
+    champEpargneMensuelle.setFont(Apparence.CORPS);
+    JPanel panneau = new JPanel(new GridLayout(4, 2, 8, 8));
+    panneau.setBackground(Apparence.FOND);
+    JLabel labelNom = new JLabel("Nom de l'objectif :");
+    labelNom.setFont(Apparence.CORPS);
+    labelNom.setForeground(Apparence.TEXTE);
+    panneau.add(labelNom);
     panneau.add(champNomObjectif);
-    panneau.add(new JLabel("Montant total ($) :"));
+    JLabel labelTotal = new JLabel("Montant total ($) :");
+    labelTotal.setFont(Apparence.CORPS);
+    labelTotal.setForeground(Apparence.TEXTE);
+    panneau.add(labelTotal);
     panneau.add(champMontantTotal);
-    panneau.add(new JLabel("Épargne mensuelle ($) :"));
+    JLabel labelEpargne = new JLabel("Épargne mensuelle ($) :");
+    labelEpargne.setFont(Apparence.CORPS);
+    labelEpargne.setForeground(Apparence.TEXTE);
+    panneau.add(labelEpargne);
     panneau.add(champEpargneMensuelle);
     panneau.add(new JLabel(""));
 
     String titre = estNouveau ? "Nouvel objectif" : "Modifier l'objectif";
     String[] options = estNouveau
       ? new String[] {"Créer", "Annuler"}
-      : new String[] {"Modifier", "Supprimer", "Annuler"};
+      : new String[] {"Modifier", "Épargner", "Supprimer", "Annuler"};
     int resultat = JOptionPane.showOptionDialog(this, panneau, titre,
       JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
     if (resultat < 0) return;
 
     if (!estNouveau && resultat == 1) {
+      fenetre.allerEpargne(objectifExistant);
+      return;
+    }
+
+    if (!estNouveau && resultat == 2) {
       int confirmation = JOptionPane.showConfirmDialog(this,
         "Voulez-vous vraiment supprimer l'objectif \"" + objectifExistant.nom + "\" ?",
         "Confirmation", JOptionPane.YES_NO_OPTION);
