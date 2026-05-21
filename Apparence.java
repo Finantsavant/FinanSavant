@@ -4,7 +4,7 @@ import java.awt.*;
 // public static final parce qu'on ne veut pas les variables soient changés
 class Apparence {
   public static final Color PRINCIPALE = new Color(41, 128, 185);
-  public static final Color SECONDAIRE = new Color(46, 204, 113);
+  public static final Color SECONDAIRE = new Color(52, 152, 219);
   public static final Color DANGER = new Color(231, 76, 60);
   public static final Color FOND = new Color(245, 247, 250);
   public static final Color TEXTE = new Color(44, 62, 80);
