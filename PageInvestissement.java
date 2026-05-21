@@ -66,8 +66,6 @@ class PageInvestissement extends JPanel {
     panneauRisque.add(boiteRisque);
     conteneurPrincipal.add(panneauRisque);
 
-    // grille 2x3 pour les cases à cocher (2 rangées, 3 colonnes, espacement 10px)
-    // https://docs.oracle.com/javase/8/docs/api/java/awt/GridLayout.html
     JPanel panneauTypes = new JPanel(new GridLayout(2, 3, 10, 10));
     panneauTypes.setOpaque(false);
     panneauTypes.setBorder(BorderFactory.createTitledBorder("Types d'investissements"));
