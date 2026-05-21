@@ -40,8 +40,6 @@ class PageProfil extends JPanel {
   JLabel messageErreur = new JLabel("", JLabel.CENTER);
   JButton boutonSauvegarder = new JButton("Sauvegarder");
 
-  // CardLayout permet de switcher entre deux "pages" dans le même panneau
-  // https://www.youtube.com/watch?v=HkJRDdWL0I8
   CardLayout dispositionCartes = new CardLayout();
   JPanel panneauCartes = new JPanel(dispositionCartes);
   JPanel carteConnexion = new JPanel(); // page de login
@@ -221,9 +219,7 @@ class PageProfil extends JPanel {
         return;
       }
 
-      // on vérifie que l'âge est bien un nombre entre 1 et 120
-      // parseInt() lance une exception si c'est pas un chiffre
-      // https://stackoverflow.com/questions/5585779/how-do-i-convert-a-string-to-an-int-in-java
+      // on vérifie que l'âge est un nombre entre 1 et 120
       try {
         int age = Integer.parseInt(ageTexte);
         if (age < 1 || age > 120) {
