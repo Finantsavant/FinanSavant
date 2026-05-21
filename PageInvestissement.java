@@ -52,13 +52,17 @@ class PageInvestissement extends JPanel {
     // panneau pour choisir la tolérance au risque
     JPanel panneauRisque = new JPanel(new FlowLayout(FlowLayout.CENTER));
     panneauRisque.setOpaque(false);
-    panneauRisque.add(new JLabel("Tolérance au risque :"));
+    JLabel etiquetteRisque = new JLabel("Tolérance au risque :");
+    etiquetteRisque.setFont(Apparence.CORPS);
+    etiquetteRisque.setForeground(Apparence.TEXTE);
+    panneauRisque.add(etiquetteRisque);
     String[] risques = {
       "Faible - Stable et sécuritaire",
       "Moyen - Équilibre croissance/sécurité",
       "Élevé - Croissance agressive"
     };
     boiteRisque = new JComboBox<>(risques);
+    boiteRisque.setFont(Apparence.CORPS);
     panneauRisque.add(boiteRisque);
     conteneurPrincipal.add(panneauRisque);
 
@@ -96,7 +100,7 @@ class PageInvestissement extends JPanel {
     boutonGenerer.setFont(Apparence.SOUS_TITRE);
     boutonGenerer.setBackground(Apparence.SECONDAIRE);
     boutonGenerer.setForeground(Color.WHITE);
-    boutonGenerer.setPreferredSize(new Dimension(240, 50));
+    boutonGenerer.setPreferredSize(new Dimension(200, 44));
     panneauBouton.add(boutonGenerer);
     conteneurPrincipal.add(panneauBouton);
 
@@ -159,6 +163,7 @@ class PageInvestissement extends JPanel {
   private JCheckBox creerCaseConfirmation(String etiquette) {
     JCheckBox caseCocher = new JCheckBox(etiquette);
     caseCocher.setOpaque(false);
+    caseCocher.setFont(Apparence.CORPS);
     attacherEcouteurConfirmation(caseCocher, etiquette);
     return caseCocher;
   }
