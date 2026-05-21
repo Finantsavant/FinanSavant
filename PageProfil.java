@@ -221,9 +221,7 @@ class PageProfil extends JPanel {
         return;
       }
 
-      // on vérifie que l'âge est bien un nombre entre 1 et 120
-      // parseInt() lance une exception si c'est pas un chiffre
-      // https://stackoverflow.com/questions/5585779/how-do-i-convert-a-string-to-an-int-in-java
+      // on vérifie que l'âge est un nombre entre 1 et 120
       try {
         int age = Integer.parseInt(ageTexte);
         if (age < 1 || age > 120) {
