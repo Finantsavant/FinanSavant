@@ -64,7 +64,7 @@ class PageEpargne extends JPanel {
     boiteEpargneEtudesEnfants.setFont(Apparence.CORPS);
     panneauFormulaire.add(boiteEpargneEtudesEnfants);
 
-    // question 3 : objectif financier principal (rempli dynamiquement selon les objectifs du profil)
+    // question 3 : objectif financier principal 
     JLabel labelObjectif = new JLabel("Objectif financier principal");
     labelObjectif.setFont(Apparence.CORPS);
     labelObjectif.setForeground(Apparence.TEXTE);
