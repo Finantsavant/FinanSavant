@@ -3,7 +3,7 @@ import java.util.ArrayList;
 /** génère les sections texte du plan d'investissement et la simulation. */
 class GenerateurRapportInvestissement {
   static String construirePlan(double montant, DonneesUtilisateur utilisateur, int niveauRisque,
-    boolean actionsSelectionnees, boolean fnbSelectionne, boolean cryptoSelectionnee,
+    boolean actionsSelectionnees, boolean etfSelectionne, boolean cryptoSelectionnee,
     boolean obligationsSelectionnees, boolean matieresSelectionnees, boolean immobilierSelectionne) {
 
     // on récupère le pourcentage à investir
@@ -14,7 +14,8 @@ class GenerateurRapportInvestissement {
     // on garde l'âge et l'occupation pour adapter le rapport
     int age = utilisateur.age;
     String occupation = utilisateur.occupation;
-
+    
+    // IA utiliser pour crée la structure du texte du plan généré
     StringBuilder rapport = new StringBuilder();
     rapport.append("=================================================\n");
     rapport.append(" PLAN D'INVESTISSEMENT PERSONNALISÉ\n");
@@ -29,7 +30,7 @@ class GenerateurRapportInvestissement {
 
     // on ajoute seulement les sections choisies
     if (actionsSelectionnees) rapport.append(construireSectionActions(montantInvesti, niveauRisque, age, occupation));
-    if (fnbSelectionne) rapport.append(construireSectionFnb(montantInvesti, niveauRisque, age));
+    if (etfSelectionne) rapport.append(construireSectionEtf(montantInvesti, niveauRisque, age));
     if (cryptoSelectionnee) rapport.append(construireSectionCrypto(montantInvesti, niveauRisque, age));
     if (obligationsSelectionnees) rapport.append(construireSectionObligations(montantInvesti, niveauRisque, age, occupation));
     if (matieresSelectionnees) rapport.append(construireSectionMatieresPremieres(montantInvesti, niveauRisque));
@@ -37,7 +38,7 @@ class GenerateurRapportInvestissement {
 
     // on ajoute la simulation de croissance
     rapport.append(construireRapportSimulation(montant, utilisateur, niveauRisque,
-      actionsSelectionnees, fnbSelectionne, cryptoSelectionnee,
+      actionsSelectionnees, etfSelectionne, cryptoSelectionnee,
       obligationsSelectionnees, matieresSelectionnees, immobilierSelectionne));
 
     rapport.append("\n=================================================\n");
@@ -76,8 +77,8 @@ class GenerateurRapportInvestissement {
 
     // conseils rapides selon le risque
     rapport.append("Recommandations immédiates :\n");
-    if (niveauRisque == 0) rapport.append("- Priorisez la stabilité : obligations, FNB défensifs, immobilier coté.\n");
-    else if (niveauRisque == 1) rapport.append("- Mélangez actions, FNB diversifiés et obligations.\n");
+    if (niveauRisque == 0) rapport.append("- Priorisez la stabilité : obligations, ETF défensifs, immobilier coté.\n");
+    else if (niveauRisque == 1) rapport.append("- Mélangez actions, ETF diversifiés et obligations.\n");
     else rapport.append("- Exposition croissance : actions, cryptomonnaies, actifs thématiques.\n");
 
     // petit conseil selon l'âge
@@ -91,7 +92,7 @@ class GenerateurRapportInvestissement {
   }
 
   private static String construireRapportSimulation(double montant, DonneesUtilisateur utilisateur,
-    int niveauRisque, boolean actionsSel, boolean fnbSel, boolean cryptoSel,
+    int niveauRisque, boolean actionsSel, boolean etfSel, boolean cryptoSel,
     boolean obligationsSel, boolean matieresSel, boolean immobilierSel) {
 
     StringBuilder rapport = new StringBuilder();
@@ -103,7 +104,7 @@ class GenerateurRapportInvestissement {
     // liste des actifs choisis
     ArrayList<String> actifs = new ArrayList<>();
     if (actionsSel) actifs.add("Actions");
-    if (fnbSel) actifs.add("FNB");
+    if (etfSel) actifs.add("ETF");
     if (cryptoSel) actifs.add("Cryptomonnaies");
     if (obligationsSel) actifs.add("Obligations");
     if (matieresSel) actifs.add("Matières premières");
@@ -148,7 +149,7 @@ class GenerateurRapportInvestissement {
     // rendement estimé selon le type d'actif
     switch (actif) {
       case "Actions": return niveauRisque == 2 ? 0.12 : niveauRisque == 1 ? 0.08 : 0.05;
-      case "FNB": return niveauRisque == 2 ? 0.10 : niveauRisque == 1 ? 0.07 : 0.05;
+      case "ETF": return niveauRisque == 2 ? 0.10 : niveauRisque == 1 ? 0.07 : 0.05;
       case "Cryptomonnaies": return niveauRisque == 2 ? 0.20 : niveauRisque == 1 ? 0.10 : 0.04;
       case "Obligations": return niveauRisque == 2 ? 0.05 : niveauRisque == 1 ? 0.04 : 0.03;
       case "Matières premières": return niveauRisque == 2 ? 0.08 : niveauRisque == 1 ? 0.06 : 0.04;
@@ -195,17 +196,17 @@ class GenerateurRapportInvestissement {
     return rapport.append("\n").toString();
   }
 
-  private static String construireSectionFnb(double montantInvesti, int risque, int age) {
-    StringBuilder rapport = new StringBuilder("──── FNB ────\n\n");
+  private static String construireSectionEtf(double montantInvesti, int risque, int age) {
+    StringBuilder rapport = new StringBuilder("──── ETF ────\n\n");
 
-    // fnb de base pour la majorité des profils
-    rapport.append(formaterLigne("VOO", "FNB S&P 500",
+    // etf de base pour la majorité des profils
+    rapport.append(formaterLigne("VOO", "ETF S&P 500",
       "Les 500 plus grandes entreprises américaines.", risque == 2 ? 0.20 : 0.30, montantInvesti));
     if (risque >= 1) {
-      rapport.append(formaterLigne("QQQ", "FNB Nasdaq-100", "Grandes entreprises technologiques.", 0.15, montantInvesti));
+      rapport.append(formaterLigne("QQQ", "ETF Nasdaq-100", "Grandes entreprises technologiques.", 0.15, montantInvesti));
     }
     if (age >= 40 || risque == 0) {
-      rapport.append(formaterLigne("XBB.TO", "FNB obligations canadiennes",
+      rapport.append(formaterLigne("XBB.TO", "ETF obligations canadiennes",
         "Marché obligataire canadien.", 0.15, montantInvesti));
     }
     return rapport.append("\n").toString();
@@ -236,7 +237,7 @@ class GenerateurRapportInvestissement {
     rapport.append(formaterLigne("CAN GOV", "Obligations du Canada",
       "Faible risque, revenus prévisibles.", allocGouv, montantInvesti));
     if (risque >= 1) {
-      rapport.append(formaterLigne("ZAG.TO", "FNB obligations agrégées",
+      rapport.append(formaterLigne("ZAG.TO", "ETF obligations agrégées",
         "Mix gouvernemental et corporatif.", 0.10, montantInvesti));
     }
     return rapport.append("\n").toString();
@@ -246,10 +247,10 @@ class GenerateurRapportInvestissement {
     StringBuilder rapport = new StringBuilder("──── MATIÈRES PREMIÈRES ────\n\n");
 
     // l'or est souvent utilisé pour diversifier
-    rapport.append(formaterLigne("GLD", "FNB Or",
+    rapport.append(formaterLigne("GLD", "ETF Or",
       "Protection contre l'inflation.", risque == 0 ? 0.15 : 0.10, montantInvesti));
     if (risque >= 1) {
-      rapport.append(formaterLigne("SLV", "FNB Argent", "Plus volatil que l'or.", 0.07, montantInvesti));
+      rapport.append(formaterLigne("SLV", "ETF Argent", "Plus volatil que l'or.", 0.07, montantInvesti));
     }
     return rapport.append("\n").toString();
   }
@@ -258,7 +259,7 @@ class GenerateurRapportInvestissement {
     StringBuilder rapport = new StringBuilder("──── IMMOBILIER COTÉ ────\n\n");
 
     // partie immobilière pour ajouter de la stabilité
-    rapport.append(formaterLigne("VNQ", "FNB immobilier diversifié",
+    rapport.append(formaterLigne("VNQ", "ETF immobilier diversifié",
       "Bureaux, résidentiel, entrepôts.", 0.15, montantInvesti));
     if (occupation.equals("Retraité") || age >= 50) {
       rapport.append(formaterLigne("O", "Realty Income",
