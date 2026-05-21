@@ -14,6 +14,7 @@ class FenetrePrincipale extends JFrame {
   PageProfil panneauProfil;
   PageAdmin panneauAdmin;
   PageObjectif panneauObjectif;
+  PageEpargne panneauEpargne;
 
   // variable pour stocker un montant (utilisé dans l’application)
   double montantOutil = 0;
@@ -48,7 +49,8 @@ class FenetrePrincipale extends JFrame {
     panneauPrincipal.add(panneauProfil, "PROFIL");
     panneauPrincipal.add(panneauObjectif, "OBJECTIF");
     panneauPrincipal.add(new PageInvestissement(this), "INVEST");
-    panneauPrincipal.add(new PageEpargne(this), "EPARGNE");
+    panneauEpargne = new PageEpargne(this);
+    panneauPrincipal.add(panneauEpargne, "EPARGNE");
     panneauPrincipal.add(panneauAdmin, "ADMIN");
 
     add(panneauPrincipal);
@@ -97,7 +99,15 @@ class FenetrePrincipale extends JFrame {
   }
 
   public void retourEpargne() {
+    if (panneauEpargne != null) panneauEpargne.actualiserObjectifs();
     disposition.show(panneauPrincipal, "EPARGNE");
+  }
+
+  public void allerEpargne(Objectif objectif) {
+    if (panneauEpargne != null && objectif != null) {
+      panneauEpargne.selectionnerObjectif(objectif.nom);
+      disposition.show(panneauPrincipal, "EPARGNE");
+    }
   }
 
   public void retourAdmin() {
