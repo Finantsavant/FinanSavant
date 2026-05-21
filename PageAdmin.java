@@ -84,7 +84,7 @@ class PageAdmin extends JPanel {
     });
 
 
-    // --- bouton rouge pour effacer TOUS les comptes non-admin ---
+    // bouton rouge pour effacer TOUS les comptes non-admin
     JButton boutonEffacerTous = new JButton("Réinitialiser tous les comptes");
     boutonEffacerTous.setBackground(Apparence.DANGER);
     boutonEffacerTous.setForeground(Color.WHITE);
@@ -110,7 +110,7 @@ class PageAdmin extends JPanel {
     });
 
 
-    // --- bouton noir ultra-sensible, réservé à "barbieri" ---
+    // bouton noir ultra-sensible, réservé à "barbieri" 
     // setVisible(false) le cache par défaut, actualiserListeUtilisateurs() le montre si besoin
     boutonReinitBarbieri = new JButton("Réinitialisation Totale (Barbieri)");
     boutonReinitBarbieri.setBackground(Color.BLACK);
