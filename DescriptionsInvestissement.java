@@ -19,9 +19,9 @@ class DescriptionsInvestissement {
         + "• Idéal pour un horizon d'investissement de 5 ans et plus<br><br>"
         + "Risque : Moyen à Élevé</html>");
 
-    DESCRIPTIONS.put("FNB",
-      "<html><b>Fonds négociés en bourse (FNB)</b><br><br>"
-        + "Un fnb regroupe plusieurs titres (actions, obligations) en un seul produit.<br><br>"
+    DESCRIPTIONS.put("ETF",
+      "<html><b>Fonds négociés en bourse </b><br><br>"
+        + "Un ETF regroupe plusieurs titres (actions, obligations) en un seul produit.<br><br>"
         + "• diversification automatique<br>"
         + "• frais de gestion très bas<br>"
         + "• idéal pour les investisseurs débutants ou passifs<br><br>"
