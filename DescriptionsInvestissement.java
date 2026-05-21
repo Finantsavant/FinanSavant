@@ -11,6 +11,7 @@ class DescriptionsInvestissement {
 
     // on associe chaque type d’investissement à une description en html
     // html ici sert à formater le texte (gras, sauts de ligne, listes) dans une interface graphique
+    // https://docs.oracle.com/javase/tutorial/uiswing/components/html.html
     DESCRIPTIONS.put("Actions",
       "<html><b>Actions</b><br><br>"
         + "Une action représente une part de propriété dans une entreprise cotée en bourse.<br><br>"
